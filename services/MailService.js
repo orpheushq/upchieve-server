@@ -68,6 +68,26 @@ module.exports = {
     sendEmail(templatedMail, callback)
   },
 
+/* create sendAccountSuccess sendgrid function */
+/* sendAccountSuccess: function (options, callback) {
+    var email = options.email
+    var token = options.token
+    var url = maybe not needed
+
+    var emailContent = [
+      'Congratulations on signing up with UPchieve! ',
+      'If you received this email by accident, please reach out to us so we can correct the error.'
+    ].join('\n\n')
+
+    var mail = getMailHelper({
+      to: email,
+      subject: '[UPchieve] Your account was successfuly created!',
+      content: emailContent
+    })
+    sendEmail(mail, callback)
+}*/
+
+
   sendReset: function (options, callback) {
     var email = options.email
     var token = options.token
