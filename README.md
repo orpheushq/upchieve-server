@@ -78,12 +78,13 @@ asdf install mongodb [VERSION]
 
 ### Setup
 
-1. Run `bin/setup` to set up database with test users and install dependencies.
+1. Start a local MongoDB server by running `mongod`. In a separate terminal, you can try connecting to the database by running `mongo` (`mongod` to start the database vs. `mongo` to connect via command line!). Run `quit()` to exit the shell. You can also interface with the database using a free MongoDB GUI such as [MongoDB Compass Community](https://docs.mongodb.com/manual/administration/install-community/)
+2. Run `bin/setup` to set up the database with test users and install dependencies.
    Run with `--verbose` to debug if needed.
-2. Populate `config.js` with auth tokens (ask a teammate if you need
-   any--improvements forthcoming).
-3. Run `npm run dev` to start the dev server on `http://localhost:3000`.
-4. See [the web client repo](https://github.com/UPchieve/web) for client
+3. Populate `config.js` with auth tokens (ask a teammate if you need
+   any of these--improvements forthcoming).
+4. Run `npm run dev` to start the dev server on `http://localhost:3000`.
+5. See [the web client repo](https://github.com/UPchieve/web) for client
    installation
 
 
@@ -335,13 +336,7 @@ Expects the following request body:
 }
 ```
 
-Makes a call to [CleanSpeak's Filter Content API][cleanspeak], analyzes the
-API's response, and returns a boolean indicating whether or not the message is
-clean.
-
-[cleanspeak]: https://www.inversoft.com/docs/cleanspeak/3.x/tech/tutorials/filtering-content#using-the-filter-content-api
-
-The response body looks like this if no error occurred:
+TODO: re-implement the moderation/fitlering at this endpoint. We need to roll our own regex solution to replace what CleanSpeak previously provided. Main thing to filter is contact info (emails, phone numbers, etc). Also filter the worst slurs.
 
 ```javascript
 {
