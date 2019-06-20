@@ -1,5 +1,7 @@
 var path = require('path')
 
+var config = require('../config')
+
 module.exports = function (app) {
   console.log('Initializing server routing')
 
@@ -9,8 +11,19 @@ module.exports = function (app) {
 
   // Determine if incoming request is a static asset
   var isStaticReq = function (req) {
-    return ['/auth', '/api', '/js', '/css'].some(function (whitelist) {
-      return req.url.substr(0, whitelist.length) === whitelist
+    var whitelist = ['/auth', '/api', '/js', '/css']
+    if (config.NODE_ENV === 'dev') {
+      whitelist.push('/debug-sentry')
+    }
+    return whitelist.some(function (whitelisted) {
+      return req.url.substr(0, whitelisted.length) === whitelisted
+    })
+  }
+
+  // Check that Sentry is working
+  if (config.NODE_ENV === 'dev') {
+    app.get('/debug-sentry', function (req, res) {
+      throw new Error('Test of Sentry')
     })
   }
 

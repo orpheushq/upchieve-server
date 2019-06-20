@@ -23,7 +23,12 @@ db.once('open', function () {
 var app = express()
 app.set('port', process.env.PORT || 3000)
 
+// Error tracking
+var sentry = require('@sentry/node')
+sentry.init({ dsn: config.sentryDsn })
+
 // Setup middleware
+app.use(sentry.Handlers.requestHandler()) // this has to come before any other middleware
 app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -45,3 +50,6 @@ console.log('Listening on port ' + port)
 
 // Load server router
 require('./router')(app)
+
+// Error handling middleware
+app.use(sentry.Handlers.errorHandler()) // this has to come before any other error middleware

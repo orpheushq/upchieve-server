@@ -9,6 +9,7 @@
     "format": "prettier-standard '*.js' '{controllers,models,router,services,seeds}/**/*.js'"
   },
   "dependencies": {
+    "@sentry/node": "^5.4.0",
     "async": "^1.5.0",
     "bcrypt": "3.0.4",
     "body-parser": "^1.18.3",
