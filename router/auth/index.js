@@ -3,6 +3,7 @@ var session = require('express-session')
 var flash = require('express-flash')
 var passport = require('passport')
 var MongoStore = require('connect-mongo')(session)
+var sentry = require('@sentry/node')
 
 var VerificationCtrl = require('../../controllers/VerificationCtrl')
 var ResetPasswordCtrl = require('../../controllers/ResetPasswordCtrl')
@@ -165,6 +166,7 @@ module.exports = function (app) {
 
       user.save(function (err) {
         if (err) {
+          sentry.captureException(err)
           res.json({
             err: err.message
           })

@@ -2,6 +2,7 @@ var config = require('../config.js')
 var User = require('../models/User')
 var twilio = require('twilio')
 var moment = require('moment-timezone')
+var sentry = require('@sentry/node')
 const client = twilio(config.accountSid, config.authToken)
 
 // todo
@@ -79,6 +80,10 @@ function send (phoneNumber, name, subtopic) {
 module.exports = {
   notify: function (type, subtopic) {
     getAvailableVolunteersFromDb(subtopic).exec(function (err, persons) {
+      if (err) {
+        sentry.captureException(err)
+        return
+      }
       persons.forEach(function (person) {
         send(person.phone, person.firstname, subtopic)
       })

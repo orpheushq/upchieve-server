@@ -478,7 +478,7 @@ userSchema.statics.checkCode = function (code, cb) {
       volunteerCode: isVolunteerCode
     })
   } else {
-    cb('Registration code is invalid', false)
+    cb(new Error('Registration code is invalid'), false)
   }
 }
 

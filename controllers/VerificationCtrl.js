@@ -29,6 +29,9 @@ module.exports = {
         // Generate the token and save token and user email to database
         function (user, done) {
           crypto.randomBytes(16, function (err, buf) {
+            if (err) {
+              return done(err)
+            }
             var token = buf.toString('hex')
 
             user.verificationToken = token

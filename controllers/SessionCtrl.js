@@ -178,11 +178,11 @@ module.exports = {
     var subTopic = options.subTopic
 
     if (!userId) {
-      cb('Cannot create a session without a user id', null)
+      cb(new Error('Cannot create a session without a user id'), null)
     } else if (user.isVolunteer) {
-      cb('Volunteers cannot create new sessions', null)
+      cb(new Error('Volunteers cannot create new sessions'), null)
     } else if (!type) {
-      cb('Must provide a type for a new session', null)
+      cb(new Error('Must provide a type for a new session'), null)
     }
 
     var session = new Session({
@@ -232,7 +232,7 @@ module.exports = {
       if (err) {
         return cb(err)
       } else if (!session) {
-        return cb('No session found!')
+        return cb(new Error('No session found!'))
       }
 
       session.joinUser(user, function (err, savedSession) {

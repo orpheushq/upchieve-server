@@ -5,7 +5,7 @@ module.exports = {
     var userId = options.userId
     User.findById(userId, function (err, user) {
       if (err || !user) {
-        callback('Could not get user')
+        callback(new Error('Could not get user'))
       } else {
         user.getProfile(callback)
       }
@@ -59,7 +59,7 @@ module.exports = {
       }
     })
     if (!hasUpdate) {
-      return callback('No fields defined to update')
+      return callback(new Error('No fields defined to update'))
     }
 
     User.findByIdAndUpdate(userId, update, { new: true }, function (err, user) {

@@ -1,5 +1,7 @@
 var mongoose = require('mongoose')
 
+var sentry = require('@sentry/node')
+
 var Message = require('./Message')
 
 var validTypes = ['Math', 'College']
@@ -74,7 +76,7 @@ sessionSchema.methods.saveMessage = function (messageObj, cb) {
     })
 
     var savedMessage = session.messages[savedMessageIndex]
-    cb(null, savedMessage)
+    cb(err, savedMessage)
   })
 }
 
@@ -83,7 +85,9 @@ sessionSchema.methods.saveWhiteboardUrl = function (whiteboardUrl, cb) {
   this.whiteboardUrl = whiteboardUrl
   this.save(function (err) {
     if (cb) {
-      cb(null, session.whiteboardUrl)
+      cb(err, session.whiteboardUrl)
+    } else if (err) {
+      sentry.captureException(err)
     }
   })
 }

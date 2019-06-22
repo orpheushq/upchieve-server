@@ -2,6 +2,7 @@ const fs = require('fs')
 const http = require('http')
 const https = require('https')
 const socket = require('socket.io')
+const sentry = require('@sentry/node')
 
 const config = require('../../config.js')
 const SessionCtrl = require('../../controllers/SessionCtrl.js')
@@ -88,7 +89,14 @@ module.exports = function (app) {
           sessionId: data.sessionId
         },
         function (err, session) {
+          if (err) {
+            sentry.captureException(err)
+            return
+          }
           session.saveMessage(message, function (err, savedMessage) {
+            if (err) {
+              sentry.captureException(err) // we want to know if the message was never saved
+            }
             io.to(data.sessionId).emit('messageSend', {
               contents: savedMessage.contents,
               name: data.user.firstname,
@@ -141,6 +149,10 @@ module.exports = function (app) {
           sessionId: data.sessionId
         },
         function (err, session) {
+          if (err) {
+            sentry.captureException(err)
+            return
+          }
           session.saveWhiteboardUrl(data.whiteboardUrl)
           socket.broadcast.to(data.sessionId).emit('end', data)
         }
