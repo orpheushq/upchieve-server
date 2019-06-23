@@ -78,7 +78,8 @@ asdf install mongodb [VERSION]
 2. Run `bin/setup` to set up the database with test users and install dependencies.
    Run with `--verbose` to debug if needed.
 3. Populate `config.js` with auth tokens (ask a teammate if you need
-   any of these--improvements forthcoming).
+   any of these--improvements forthcoming). If you want to track errors on Sentry, set the
+   `sentryDsn` property to whichever Sentry database you would like to receive messages.
 4. Run `npm run dev` to start the dev server on `http://localhost:3000`. If you get a [`bcrypt`][bcrypt] compilement error, run `npm rebuild`.
 5. See [the web client repo](https://github.com/UPchieve/web) for client
    installation
