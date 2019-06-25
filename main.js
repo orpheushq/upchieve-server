@@ -25,7 +25,10 @@ app.set('port', process.env.PORT || 3000)
 
 // Error tracking
 var sentry = require('@sentry/node')
-sentry.init({ dsn: config.sentryDsn })
+sentry.init({
+  dsn: config.sentryDsn,
+  environment: config.NODE_ENV
+})
 
 // Setup middleware
 app.use(sentry.Handlers.requestHandler()) // this has to come before any other middleware
