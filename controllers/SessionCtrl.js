@@ -237,6 +237,7 @@ module.exports = {
 
       session.joinUser(user, function (err, savedSession) {
         if (err) {
+          sentry.captureException(err)
           sessionManager.disconnect({
             socket: socket
           })

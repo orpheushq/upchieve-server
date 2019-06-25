@@ -191,6 +191,7 @@ module.exports = function (app) {
                       msg =
                         'Registration successful. Error sending verification email: ' +
                         err
+                      sentry.captureException(err)
                     } else {
                       msg =
                         'Registration successful. Verification email sent to ' +

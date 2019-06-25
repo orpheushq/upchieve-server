@@ -62,6 +62,7 @@ module.exports = function (app) {
         function (err, session) {
           if (err) {
             console.log('Error leaving session', err)
+            sentry.captureException(err)
           } else if (session) {
             console.log('Left session', session._id)
             socket.leave(session._id)

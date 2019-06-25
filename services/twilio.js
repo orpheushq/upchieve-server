@@ -74,7 +74,10 @@ function send (phoneNumber, name, subtopic) {
         `Message sent to ${phoneNumber} with message id \n` + message.sid
       )
     )
-    .catch(err => console.log(err))
+    .catch(err => {
+      console.log(err)
+      sentry.captureException(err)
+    })
 }
 
 module.exports = {
