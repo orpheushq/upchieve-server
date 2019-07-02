@@ -29,6 +29,8 @@ var dontReport = [
   [ 'code', 'EUIDNOTFOUND' ],
   // Session not found
   [ 'code', 'ESIDNOTFOUND' ],
+  // No client authentication
+  [ 'code', 'ENOAUTH' ],
   // Invalid request data
   [ 'code', 'EBADDATA' ]
 ]
