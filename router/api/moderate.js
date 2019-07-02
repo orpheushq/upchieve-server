@@ -1,13 +1,10 @@
-const sentry = require('@sentry/node')
-
 const ModerationCtrl = require('../../controllers/ModerationCtrl')
 
 module.exports = router => {
-  router.route('/moderate/message').post((req, res) => {
+  router.route('/moderate/message').post((req, res, next) => {
     ModerationCtrl.moderateMessage(req.body, (err, isClean) => {
       if (err) {
-        sentry.captureException(err)
-        res.json({ err })
+        next(err)
       } else {
         res.json({ isClean })
       }

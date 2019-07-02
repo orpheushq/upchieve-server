@@ -1,6 +1,8 @@
 var Session = require('../models/Session')
 var twilioService = require('../services/twilio')
 
+var sentry = require('@sentry/node')
+
 // A socket session tracks a session with its users and sockets
 var SocketSession = function (options) {
   this.session = options.session

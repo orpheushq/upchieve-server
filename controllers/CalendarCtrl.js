@@ -1,5 +1,7 @@
 var User = require('../models/User')
 
+var errors = require('../errors')
+
 module.exports = {
   initAvailability: function (options, callback) {
     var userid = options.userid
@@ -193,7 +195,7 @@ module.exports = {
         return callback(err)
       }
       if (!user) {
-        return callback(new Error('No account with that id found.'))
+        return callback(errors.generateError(errors.ERR_USER_NOT_FOUND))
       }
       user.availability = availability
       user.hasSchedule = true
@@ -215,7 +217,7 @@ module.exports = {
         return callback(err)
       }
       if (!user) {
-        return callback(new Error('No account with that id found.'))
+        return callback(errors.generateError(errors.ERR_USER_NOT_FOUND))
       }
       callback(null, user.availability)
     })
@@ -229,7 +231,7 @@ module.exports = {
         return callback(err)
       }
       if (!user) {
-        return callback(new Error('No account with that id found.'))
+        return callback(errors.generateError(errors.ERR_USER_NOT_FOUND))
       }
       user.availability = availability
       user.save(function (err, user) {
@@ -250,7 +252,7 @@ module.exports = {
         return callback(err)
       }
       if (!user) {
-        return callback(new Error('No account with that id found.'))
+        return callback(errors.generateError(errors.ERR_USER_NOT_FOUND))
       }
       user.timezone = tz
       user.save(function (err, user) {
@@ -270,7 +272,7 @@ module.exports = {
         return callback(err)
       }
       if (!user) {
-        return callback(new Error('No account with that id found.'))
+        return callback(errors.generateError(errors.ERR_USER_NOT_FOUND))
       }
       callback(null, user.timezone)
     })

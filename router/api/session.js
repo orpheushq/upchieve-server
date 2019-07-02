@@ -1,8 +1,10 @@
+var errors = require('../../errors')
+
 var SessionCtrl = require('../../controllers/SessionCtrl')
 var ObjectId = require('mongodb').ObjectId
 
 module.exports = function (router) {
-  router.route('/session/new').post(function (req, res) {
+  router.route('/session/new').post(function (req, res, next) {
     var data = req.body || {}
     var sessionType = data.sessionType
     var sessionSubTopic = data.sessionSubTopic
@@ -16,9 +18,7 @@ module.exports = function (router) {
       },
       function (err, session) {
         if (err) {
-          res.json({
-            err: err
-          })
+          next(err)
         } else {
           res.json({
             sessionId: session._id
@@ -28,7 +28,7 @@ module.exports = function (router) {
     )
   })
 
-  router.route('/session/end').post(function (req, res) {
+  router.route('/session/end').post(function (req, res, next) {
     var data = req.body || {}
     var sessionId = data.sessionId
 
@@ -38,9 +38,9 @@ module.exports = function (router) {
       },
       function (err, session) {
         if (err) {
-          res.json({ err: err })
+          next(err)
         } else if (!session) {
-          res.json({ err: 'No session found' })
+          next(errors.generateError(errors.ERR_SESSION_NOT_FOUND))
         } else {
           session.endSession()
           res.json({ sessionId: session._id })
@@ -49,7 +49,7 @@ module.exports = function (router) {
     )
   })
 
-  router.route('/session/check').post(function (req, res) {
+  router.route('/session/check').post(function (req, res, next) {
     var data = req.body || {}
     var sessionId = data.sessionId
 
@@ -59,13 +59,9 @@ module.exports = function (router) {
       },
       function (err, session) {
         if (err) {
-          res.json({
-            err: err
-          })
+          next(err)
         } else if (!session) {
-          res.json({
-            err: 'No session found'
-          })
+          next(errors.generateError(errors.ERR_SESSION_NOT_FOUND))
         } else {
           res.json({
             sessionId: session._id,
@@ -76,7 +72,7 @@ module.exports = function (router) {
     )
   })
 
-  router.route('/session/current').post(function (req, res) {
+  router.route('/session/current').post(function (req, res, next) {
     const data = req.body || {}
     const userId = data.user_id
     const isVolunteer = data.is_volunteer
@@ -101,9 +97,9 @@ module.exports = function (router) {
       },
       function (err, session) {
         if (err) {
-          res.json({ err: err })
+          next(err)
         } else if (!session) {
-          res.json({ err: 'No session found' })
+          next(errors.generateError(errors.ERR_SESSION_NOT_FOUND))
         } else {
           res.json({
             sessionId: session._id,

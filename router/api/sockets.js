@@ -4,6 +4,7 @@ const https = require('https')
 const socket = require('socket.io')
 const sentry = require('@sentry/node')
 
+const errors = require('../../errors.js')
 const config = require('../../config.js')
 const SessionCtrl = require('../../controllers/SessionCtrl.js')
 
@@ -21,6 +22,18 @@ const createServer = app => {
   } else {
     return http.createServer(app)
   }
+}
+
+function handleErrorSocket (err, io) {
+  if (typeof (err.statusCode) === 'undefined') {
+    err.statusCode = errors.statusFor(err)
+  }
+  if (!errors.dontReport.some(function (e) {
+    return err[e[0]] === e[1]
+  })) {
+    sentry.captureException(err)
+  }
+  io.emit('error', err)
 }
 
 module.exports = function (app) {
@@ -41,7 +54,7 @@ module.exports = function (app) {
         function (err, session) {
           if (err) {
             console.log('Could not join session')
-            io.emit('error', err)
+            handleErrorSocket(err, io)
           } else {
             socket.join(data.sessionId)
             console.log('Session joined:', session._id)
@@ -62,7 +75,7 @@ module.exports = function (app) {
         function (err, session) {
           if (err) {
             console.log('Error leaving session', err)
-            sentry.captureException(err)
+            handleErrorSocket(err, io)
           } else if (session) {
             console.log('Left session', session._id)
             socket.leave(session._id)
@@ -85,7 +98,6 @@ module.exports = function (app) {
       socket.broadcast.to(data.sessionId).emit('not-typing')
     })
 
-
     socket.on('message', function (data) {
       if (!data.sessionId) return
 
@@ -100,12 +112,12 @@ module.exports = function (app) {
         },
         function (err, session) {
           if (err) {
-            sentry.captureException(err)
+            handleErrorSocket(err, io)
             return
           }
           session.saveMessage(message, function (err, savedMessage) {
             if (err) {
-              sentry.captureException(err) // we want to know if the message was never saved
+              handleErrorSocket(err, io)
             }
             io.to(data.sessionId).emit('messageSend', {
               contents: savedMessage.contents,
@@ -160,7 +172,7 @@ module.exports = function (app) {
         },
         function (err, session) {
           if (err) {
-            sentry.captureException(err)
+            handleErrorSocket(err, io)
             return
           }
           session.saveWhiteboardUrl(data.whiteboardUrl)

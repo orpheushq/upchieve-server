@@ -11,6 +11,8 @@ var ResetPasswordCtrl = require('../../controllers/ResetPasswordCtrl')
 var config = require('../../config.js')
 var User = require('../../models/User.js')
 
+var errors = require('../../errors')
+
 // Validation functions
 function checkPassword (password) {
   if (password.length < 8) {
@@ -87,23 +89,19 @@ module.exports = function (app) {
     }
   )
 
-  router.post('/register/checkcred', function (req, res) {
+  router.post('/register/checkcred', function (req, res, next) {
     var email = req.body.email
 
     var password = req.body.password
 
     if (!email || !password) {
-      return res.json({
-        err: 'Must supply an email and password for registration'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Must supply an email and password for registration'))
     }
 
     // Verify password for registration
     let checkResult = checkPassword(password)
     if (checkResult !== true) {
-      return res.json({
-        err: checkResult
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, checkResult))
     }
 
     User.find({ email: email }, function (req, users) {
@@ -112,14 +110,12 @@ module.exports = function (app) {
           checked: true
         })
       } else {
-        return res.json({
-          err: 'The email address you entered is already in use'
-        })
+        next(errors.generateError(errors.ERR_INVALID_DATA, 'The email address you entered is already in use'))
       }
     })
   })
 
-  router.post('/register', function (req, res) {
+  router.post('/register', function (req, res, next) {
     var email = req.body.email
 
     var password = req.body.password
@@ -127,41 +123,35 @@ module.exports = function (app) {
     var code = req.body.code
 
     var highSchool = req.body.highSchool
-    
+
     var college = req.body.college
-    
+
     var phone = req.body.phone
-    
+
     var favoriteAcademicSubject = req.body.favoriteAcademicSubject
 
     var firstName = req.body.firstName
 
     var lastName = req.body.lastName
-    
-    var terms = req.body.terms;
-    
+
+    var terms = req.body.terms
+
     if (!terms) {
-      return res.json({
-        err: 'Must accept the user agreement'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Must accept the user agreement'))
     }
 
     if (!email || !password) {
-      return res.json({
-        err: 'Must supply an email and password for registration'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Must supply an email and password for registration'))
     }
 
     // Verify password for registration
     let checkResult = checkPassword(password)
     if (checkResult !== true) {
-      return res.json({
-        err: checkResult
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, checkResult))
     }
-    
+
     var user = new User()
-    user.email = email    
+    user.email = email
     user.isVolunteer = !(code === undefined)
     user.registrationCode = code
     user.highschool = highSchool
@@ -176,26 +166,18 @@ module.exports = function (app) {
       user.password = hash // Note the salt is embedded in the final hash
 
       if (err) {
-        res.json({
-          err: 'Could not hash password'
-        })
+        next(err)
         return
       }
 
       user.save(function (err) {
         if (err) {
-          sentry.captureException(err)
-          res.json({
-            err: err.message
-          })
+          next(err)
         } else {
           req.login(user, function (err) {
             if (err) {
               console.log(err)
-              res.json({
-                // msg: msg,
-                err: err
-              })
+              next(err)
             } else {
               if (user.isVolunteer) {
                 VerificationCtrl.initiateVerification(
@@ -244,20 +226,16 @@ module.exports = function (app) {
     })
   })
 
-  router.post('/register/check', function (req, res) {
+  router.post('/register/check', function (req, res, next) {
     var code = req.body.code
     console.log(code)
     if (!code) {
-      res.json({
-        err: 'No registration code given'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'No registration code given'))
       return
     }
     User.checkCode(code, function (err, data) {
       if (err) {
-        res.json({
-          err: err
-        })
+        next(err)
       } else {
         res.json({
           valid: data.studentCode || data.volunteerCode
@@ -266,12 +244,10 @@ module.exports = function (app) {
     })
   })
 
-  router.post('/reset/send', function (req, res) {
+  router.post('/reset/send', function (req, res, next) {
     var email = req.body.email
     if (!email) {
-      return res.json({
-        err: 'Must supply an email for password reset'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Must supply an email for password reset'))
     }
     ResetPasswordCtrl.initiateReset(
       {
@@ -279,9 +255,7 @@ module.exports = function (app) {
       },
       function (err, data) {
         if (err) {
-          res.json({
-            err: err
-          })
+          next(err)
         } else {
           res.json({
             msg: 'Password reset email sent'
@@ -291,7 +265,7 @@ module.exports = function (app) {
     )
   })
 
-  router.post('/reset/confirm', function (req, res) {
+  router.post('/reset/confirm', function (req, res, next) {
     var email = req.body.email
 
     var password = req.body.password
@@ -301,28 +275,18 @@ module.exports = function (app) {
     var token = req.body.token
 
     if (!token) {
-      return res.json({
-        err: 'No password reset token given'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'No password reset token given'))
     } else if (!email || !password) {
-      return res.json({
-        err: 'Must supply an email and password for password reset'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Must supply an email and password for password reset'))
     } else if (!newpassword) {
-      return res.json({
-        err: 'Must reenter password for password reset'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Must reenter password for password reset'))
     } else if (newpassword !== password) {
-      return res.json({
-        err: 'Passwords do not match'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Passwords do not match'))
     }
 
     // Verify password for password reset
     if (password.length < 8) {
-      return res.json({
-        err: 'Password must be 8 characters or longer'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Password must be 8 characters or longer'))
     }
 
     var numUpper = 0
@@ -339,19 +303,13 @@ module.exports = function (app) {
     }
 
     if (numUpper === 0) {
-      return res.json({
-        err: 'Password must contain at least one uppercase letter'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Password must contain at least one uppercase letter'))
     }
     if (numLower === 0) {
-      return res.json({
-        err: 'Password must contain at least one lowercase letter'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Password must contain at least one lowercase letter'))
     }
     if (numNumber === 0) {
-      return res.json({
-        err: 'Password must contain at least one number'
-      })
+      next(errors.generateError(errors.ERR_INVALID_DATA, 'Password must contain at least one number'))
     }
 
     ResetPasswordCtrl.finishReset(
@@ -361,22 +319,16 @@ module.exports = function (app) {
       },
       function (err, user) {
         if (err) {
-          res.json({
-            err: err
-          })
+          next(err)
         } else {
           user.hashPassword(password, function (err, hash) {
             if (err) {
-              res.json({
-                err: 'Could not hash password'
-              })
+              next(err)
             } else {
               user.password = hash // Note the salt is embedded in the final hash
               user.save(function (err) {
                 if (err) {
-                  return res.json({
-                    err: 'Could not save user'
-                  })
+                  next(err)
                 }
                 return res.json({
                   user: user

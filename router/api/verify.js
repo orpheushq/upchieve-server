@@ -1,13 +1,16 @@
+var errors = require('../../errors')
+
 var VerificationCtrl = require('../../controllers/VerificationCtrl')
 
 module.exports = function (router) {
-  router.post('/verify/send', function (req, res) {
+  router.post('/verify/send', function (req, res, next) {
     var userId = req.user && req.user._id
 
     if (!userId) {
-      return res.json({
-        err: 'Must be authenticated to send verification email'
-      })
+      next(
+        errors.generateError(errors.ERR_NOT_AUTHENTICATED,
+          'Must be authenticated to send verification email')
+      )
     }
 
     VerificationCtrl.initiateVerification(
@@ -16,7 +19,7 @@ module.exports = function (router) {
       },
       function (err, email) {
         if (err) {
-          res.json({ err: err })
+          next(err)
         } else {
           res.json({ msg: 'Verification email sent to ' + email })
         }
@@ -24,7 +27,7 @@ module.exports = function (router) {
     )
   })
 
-  router.post('/verify/confirm', function (req, res) {
+  router.post('/verify/confirm', function (req, res, next) {
     var token = req.body.token
     VerificationCtrl.finishVerification(
       {
@@ -32,7 +35,7 @@ module.exports = function (router) {
       },
       function (err, user) {
         if (err) {
-          res.json({ err: err })
+          next(err)
         } else {
           res.json({
             msg: 'Verification successful'

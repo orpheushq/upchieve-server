@@ -38,30 +38,35 @@ var userSchema = new mongoose.Schema({
   groupIdentification: [String],
   computerAccess: [String],
   preferredTimes: [String],
-  phone: { 
-     type: String,
-     validate: {
-       validator: function(v) {
-         var re = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
-         return re.test(v);
-       },
-       message: '{VALUE} is not a phone number in the format ###-###-####'
-     },
-     required: [function() { return this.isVolunteer; }, 'Phone number is required.']
+  phone: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        var re = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/
+        return re.test(v)
+      },
+      message: '{VALUE} is not a phone number in the format ###-###-####'
+    },
+    required: [function () { return this.isVolunteer }, 'Phone number is required.']
   },
-  highschool: { type: String, required: [function() { return !this.isVolunteer; }, 'High school is required.'] },
+  highschool: { type: String, required: [function () { return !this.isVolunteer }, 'High school is required.'] },
   currentGrade: String,
   expectedGraduation: String,
   difficultAcademicSubject: String,
   difficultCollegeProcess: [String],
   highestLevelEducation: [String],
   hasGuidanceCounselor: String,
-  favoriteAcademicSubject: { type: String, required: [function() { return this.isVolunteer; }, 
-      'Favorite academic subject is required']},
+  favoriteAcademicSubject: {
+    type: String,
+    required: [
+      function () { return this.isVolunteer },
+      'Favorite academic subject is required'
+    ]
+  },
   gpa: String,
   collegeApplicationsText: String,
   commonCollegeDocs: [String],
-  college: { type: String, required: [function() { return this.isVolunteer; }, 'College is required.'] },
+  college: { type: String, required: [function () { return this.isVolunteer }, 'College is required.'] },
   academicInterestsText: String,
   testScoresText: String,
   advancedCoursesText: String,

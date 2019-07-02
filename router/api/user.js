@@ -1,19 +1,18 @@
+var errors = require('../../errors')
 var UserCtrl = require('../../controllers/UserCtrl')
 
 module.exports = function (router) {
-  router.route('/user').get(function (req, res) {
+  router.route('/user').get(function (req, res, next) {
     if (req.user) {
       res.json({
         user: req.user
       })
     } else {
-      res.json({
-        err: 'Client has no authenticated session'
-      })
+      next(errors.generateError(errors.ERR_NOT_AUTHENTICATED))
     }
   })
 
-  router.put('/user', function (req, res) {
+  router.put('/user', function (req, res, next) {
     var data = req.body || {}
     UserCtrl.update(
       {
@@ -53,7 +52,7 @@ module.exports = function (router) {
       },
       function (err, user) {
         if (err) {
-          res.json({ err: err })
+          next(err)
         } else {
           res.json({
             user: user
