@@ -23,18 +23,13 @@ var errorStatusCodes = {
   '$allOthers': 500
 }
 
-// Errors that should not be reported to Sentry
+// Error types that should not be reported to Sentry
 var dontReport = [
-  // Validation failed
-  [ 'name', 'ValidationError' ],
-  // User ID not found
-  [ 'code', 'EUIDNOTFOUND' ],
-  // Session not found
-  [ 'code', 'ESIDNOTFOUND' ],
-  // No client authentication
-  [ 'code', 'ENOAUTH' ],
-  // Invalid request data
-  [ 'code', 'EBADDATA' ]
+   'ValidationError',
+   'EUIDNOTFOUND',
+   'ESIDNOTFOUND',
+   'ENOAUTH',
+   'EBADDATA'
 ]
 
 // define a toJSON object that will serialize errors properly for transmission to client

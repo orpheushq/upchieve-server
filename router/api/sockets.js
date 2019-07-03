@@ -28,11 +28,7 @@ function handleErrorSocket (err, io) {
   if (typeof (err.statusCode) === 'undefined') {
     err.statusCode = errors.statusFor(err)
   }
-  if (!errors.dontReport.some(function (e) {
-    return err[e[0]] === e[1]
-  })) {
-    sentry.captureException(err)
-  }
+  sentry.captureException(err)
   io.emit('error', err)
 }
 

@@ -31,11 +31,13 @@ sentry.init({
   dsn: config.sentryDsn,
   environment: config.NODE_ENV,
   beforeSend (event) {
-    // don't report if error has a property matching one of those specified in errors.js
-    if (errors.dontReport.some(function (e) {
-      return event.exception[e[0]] === e[1]
-    })) {
-      return null
+    if (event.exception) {
+      // don't report if error has a property matching one of those specified in errors.js
+      if (errors.dontReport.some(function (e) {
+        return event.exception.values[0].type === e
+      })) {
+        return null
+      }
     }
 
     return event
