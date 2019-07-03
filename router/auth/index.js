@@ -289,7 +289,7 @@ module.exports = function (app) {
   })
 
   router.post('/reset/confirm', function (req, res) {
-    var email = req.body.email
+    
 
     var password = req.body.password
 
@@ -301,9 +301,9 @@ module.exports = function (app) {
       return res.json({
         err: 'No password reset token given'
       })
-    } else if (!email || !password) {
+    } else if (!password) {
       return res.json({
-        err: 'Must supply an email and password for password reset'
+        err: 'Must supply a password for password reset'
       })
     } else if (!newpassword) {
       return res.json({
