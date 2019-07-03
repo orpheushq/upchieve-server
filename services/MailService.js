@@ -49,7 +49,7 @@ module.exports = {
   sendVerification: function (options, callback) {
     var email = options.email
     var token = options.token
-    var url = 'http://' + config.client.host + '/#/action/verify/' + token
+    var url = 'http://' + config.client.host + '/action/verify/' + token
     console.log(url)
 
     var mail = getMailHelper({
