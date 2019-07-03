@@ -15,6 +15,7 @@ module.exports = function (app) {
   require('./feedback')(router)
   require('./sockets')(app)
   require('./moderate')(router)
+  require('./debug-sentry')(router)
 
   app.use('/api', passport.isAuthenticated, router)
 }

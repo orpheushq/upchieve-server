@@ -45,12 +45,6 @@ sentry.init({
 // Setup middleware
 // error handling
 app.use(sentry.Handlers.requestHandler()) // this has to come before any other middleware
-app.use(['/api', '/auth'], function (err, req, res, next) {
-  // respond with appropriate status code
-  res.status(errors.statusFor(err)).json({
-    err: err
-  })
-})
 
 app.use(logger('dev'))
 app.use(bodyParser.json())
@@ -76,3 +70,9 @@ require('./router')(app)
 
 // Error handling middleware
 app.use(sentry.Handlers.errorHandler()) // this has to come before any other error middleware
+app.use(['/api', '/auth'], function (err, req, res, next) {
+  // respond with appropriate status code
+  res.status(errors.statusFor(err)).json({
+    err: err
+  })
+})
