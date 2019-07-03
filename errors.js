@@ -47,17 +47,14 @@ module.exports = {
   statusFor: function (err) {
     return Object.entries(err).map(function (e1) {
       let [key1, value1] = e1
-      if (key1 === '$allOthers') {
-        return value1
-      } else {
-        return Object.entries(errorStatusCodes[key1]).find(function (e2) {
-          let [key2] = e2
-          return err[key1] === key2
-        })[1]
-      }
+      if (!errorStatusCodes[key1]) return undefined
+      return Object.entries(errorStatusCodes[key1]).find(function (e2) {
+        let [key2] = e2
+        return err[key1] === key2
+      })[1]
     }).find(function (c) {
       return (typeof (c)) !== 'undefined'
-    })
+    }) || errorStatusCodes['$allOthers']
   },
 
   ERR_USER_NOT_FOUND: 'EUIDNOTFOUND',
