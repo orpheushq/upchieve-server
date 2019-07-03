@@ -1,3 +1,5 @@
+var config = require('./config')
+
 // Errors defined for the UPchieve app
 var errors = {
   'EUIDNOTFOUND': 'No account with that id found.',
@@ -35,6 +37,28 @@ var dontReport = [
   [ 'code', 'EBADDATA' ]
 ]
 
+// define a toJSON object that will serialize errors properly for transmission to client
+if (!('toJSON' in Error.prototype)) {
+  Object.defineProperty(Error.prototype, 'toJSON', {
+    value: function () {
+      var plainObj = {}
+
+      if (config.NODE_ENV === 'dev') {
+        Object.getOwnPropertyNames(this).forEach(function (key) {
+          plainObj[key] = this[key]
+        }, this)
+      }
+      else {
+        plainObj.message = this.message
+        plainObj.code = this.code
+        plainObj.statusCode = this.statusCode
+      }
+
+      return plainObj
+    }
+  })
+}
+
 module.exports = {
   // codes, specific to the module that calls this function
   generateError: function (code, msg) {
@@ -48,10 +72,16 @@ module.exports = {
     return Object.entries(err).map(function (e1) {
       let [key1, value1] = e1
       if (!errorStatusCodes[key1]) return undefined
-      return Object.entries(errorStatusCodes[key1]).find(function (e2) {
+      var statusCodeEntry = Object.entries(errorStatusCodes[key1]).find(function (e2) {
         let [key2] = e2
         return err[key1] === key2
-      })[1]
+      })
+      if (statusCodeEntry) {
+        return statusCodeEntry[1]
+      }
+      else {
+        return undefined
+      }
     }).find(function (c) {
       return (typeof (c)) !== 'undefined'
     }) || errorStatusCodes['$allOthers']
