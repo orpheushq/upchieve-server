@@ -34,7 +34,7 @@ var dontReport = [
   'EBADDATA'
 ]
 
-// define a toJSON object that will serialize errors properly for transmission to client
+// define a toJSON method that will serialize errors properly for transmission to client
 if (!('toJSON' in Error.prototype)) {
   Object.defineProperty(Error.prototype, 'toJSON', {
     value: function () {
