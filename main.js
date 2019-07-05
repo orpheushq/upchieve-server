@@ -90,13 +90,15 @@ function processErrorEvent (err, req, res, sentryEvent) {
   // respond with appropriate status code
   res.status(errors.statusFor(err)).json({
     err: err,
-    sentryEventId: sentryEvent.eventId
+    sentryEventId: sentryEvent ? sentryEvent.eventId : undefined
   })
 
   // remove the event from the observable array
-  sentryErrorEvents.splice(sentryErrorEvents.findIndex(function (e) {
-    return e === sentryEvent
-  }), 1)
+  if (sentryEvent) {
+    sentryErrorEvents.splice(sentryErrorEvents.findIndex(function (e) {
+      return e === sentryEvent
+    }), 1)
+  }
 }
 
 app.use(sentry.Handlers.errorHandler()) // this has to come before any other error middleware
