@@ -27,11 +27,11 @@ var errorStatusCodes = {
 
 // Error types that should not be reported to Sentry
 var dontReport = [
-   'ValidationError',
-   'EUIDNOTFOUND',
-   'ESIDNOTFOUND',
-   'ENOAUTH',
-   'EBADDATA'
+  'ValidationError',
+  'EUIDNOTFOUND',
+  'ESIDNOTFOUND',
+  'ENOAUTH',
+  'EBADDATA'
 ]
 
 // define a toJSON object that will serialize errors properly for transmission to client
@@ -44,8 +44,7 @@ if (!('toJSON' in Error.prototype)) {
         Object.getOwnPropertyNames(this).forEach(function (key) {
           plainObj[key] = this[key]
         }, this)
-      }
-      else {
+      } else {
         plainObj.message = this.message
         plainObj.code = this.code
         plainObj.statusCode = this.statusCode
@@ -68,7 +67,7 @@ module.exports = {
 
   statusFor: function (err) {
     return Object.entries(err).map(function (e1) {
-      let [key1, value1] = e1
+      let [key1] = e1
       if (!errorStatusCodes[key1]) return undefined
       var statusCodeEntry = Object.entries(errorStatusCodes[key1]).find(function (e2) {
         let [key2] = e2
@@ -76,8 +75,7 @@ module.exports = {
       })
       if (statusCodeEntry) {
         return statusCodeEntry[1]
-      }
-      else {
+      } else {
         return undefined
       }
     }).find(function (c) {

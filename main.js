@@ -85,34 +85,38 @@ console.log('Listening on port ' + port)
 require('./router')(app)
 
 // Error handling middleware
-function jsonErrorResponse(err, req, res, sentryEventId) {
+// function for processing errors in API routes when the Sentry ID is obtained
+function processErrorEvent (err, req, res, sentryEvent) {
   // respond with appropriate status code
   res.status(errors.statusFor(err)).json({
     err: err,
-    sentryEventId: sentryEventId
+    sentryEventId: sentryEvent.eventId
   })
+
+  // remove the event from the observable array
+  sentryErrorEvents.splice(sentryErrorEvents.findIndex(function (e) {
+    return e === sentryEvent
+  }), 1)
 }
 
 app.use(sentry.Handlers.errorHandler()) // this has to come before any other error middleware
 app.use(['/api', '/auth'], function (err, req, res, next) {
   // look for the eventId in the observable array
-  var filteredErrorEvents = sentryErrorEvents.filter(function(e) { return e.errorId === err._uid })
+  var filteredErrorEvents = sentryErrorEvents.filter(function (e) { return e.errorId === err._uid })
   if (filteredErrorEvents.length === 0) {
     if (errors.dontReport.some(function (e) { return err.name === e || err.code === e })) {
-      jsonErrorResponse(err, req, res)
+      processErrorEvent(err, req, res)
     } else {
       // wait for Sentry to prepare the event id before responding
       var pushHandler = function (event) {
-        if (filteredErrorEvents.length > 0) {
-          jsonErrorResponse(err, req, res, filteredErrorEvents[0].eventId)
-          sentryErrorEvents.pop()
+        if (event.type === 'push') {
+          processErrorEvent(err, req, res, event.values[0])
           filteredErrorEvents.off('change', pushHandler)
         }
       }
       filteredErrorEvents.on('change', pushHandler)
     }
   } else {
-    jsonErrorResponse(err, req, res, filteredErrorEvents[0].eventId)
-    sentryErrorEvents.pop()
+    processErrorEvent(err, req, res, filteredErrorEvents[0])
   }
 })
