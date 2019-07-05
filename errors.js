@@ -1,3 +1,5 @@
+var uid = require('node-uid')
+
 var config = require('./config')
 
 // Errors defined for the UPchieve app
@@ -60,6 +62,7 @@ module.exports = {
     var err = new Error(msg || errors[code])
     err.code = code
     err.statusCode = this.statusFor(err)
+    err._uid = uid()
     return err
   },
 

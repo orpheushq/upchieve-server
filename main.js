@@ -8,6 +8,7 @@ var bodyParser = require('body-parser')
 var busboy = require('connect-busboy')
 var cors = require('cors')
 var mongoose = require('mongoose')
+var observableArray = require('observable-array')
 
 // Configuration
 var config = require('./config')
@@ -27,16 +28,29 @@ app.set('port', process.env.PORT || 3000)
 
 // Error tracking
 var sentry = require('@sentry/node')
+
+// A SentryErrorEvent contains an error object and associated Sentry event ID
+var SentryErrorEvent = function (options) {
+  this.errorId = options.errorId || options.err._uid
+  this.eventId = options.eventId
+}
+var sentryErrorEvents = observableArray()
+
 sentry.init({
   dsn: config.sentryDsn,
   environment: config.NODE_ENV,
-  beforeSend (event) {
+  beforeSend (event, hint) {
     if (event.exception) {
       // don't report if error has a property matching one of those specified in errors.js
       if (errors.dontReport.some(function (e) {
         return event.exception.values[0].type === e
       })) {
         return null
+      } else {
+        sentryErrorEvents.push(new SentryErrorEvent({
+          errorId: hint.originalException._uid,
+          eventId: event.event_id
+        }))
       }
     }
 
@@ -71,10 +85,34 @@ console.log('Listening on port ' + port)
 require('./router')(app)
 
 // Error handling middleware
-app.use(sentry.Handlers.errorHandler()) // this has to come before any other error middleware
-app.use(['/api', '/auth'], function (err, req, res, next) {
+function jsonErrorResponse(err, req, res, sentryEventId) {
   // respond with appropriate status code
   res.status(errors.statusFor(err)).json({
-    err: err
+    err: err,
+    sentryEventId: sentryEventId
   })
+}
+
+app.use(sentry.Handlers.errorHandler()) // this has to come before any other error middleware
+app.use(['/api', '/auth'], function (err, req, res, next) {
+  // look for the eventId in the observable array
+  var filteredErrorEvents = sentryErrorEvents.filter(function(e) { return e.errorId === err._uid })
+  if (filteredErrorEvents.length === 0) {
+    if (errors.dontReport.some(function (e) { return err.name === e || err.code === e })) {
+      jsonErrorResponse(err, req, res)
+    } else {
+      // wait for Sentry to prepare the event id before responding
+      var pushHandler = function (event) {
+        if (filteredErrorEvents.length > 0) {
+          jsonErrorResponse(err, req, res, filteredErrorEvents[0].eventId)
+          sentryErrorEvents.pop()
+          filteredErrorEvents.off('change', pushHandler)
+        }
+      }
+      filteredErrorEvents.on('change', pushHandler)
+    }
+  } else {
+    jsonErrorResponse(err, req, res, filteredErrorEvents[0].eventId)
+    sentryErrorEvents.pop()
+  }
 })
