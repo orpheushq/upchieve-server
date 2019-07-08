@@ -42,13 +42,14 @@ module.exports = function (router) {
             return handleError(err)
           }
           else if (Array.isArray(user.pastSessions)) {
+            // find if the session already exists in pastSessions
             User.find({'pastSessions': session._id},
               function (err, results) {
                 if (err) { 
                   throw err
                  }
+                // if the session doesn't exist, add it to pastSessions
                 if (!results.length) {
-                  console.log(results)
                   user.pastSessions.push(session._id)
                   user.save(function (err, user) {
                     if (err) {
@@ -58,6 +59,7 @@ module.exports = function (router) {
                 }
               })
           }
+          // if the user has no sessions at all, initialize the array with the current session
           else {
             user.pastSessions = [session._id];
         }
@@ -78,6 +80,7 @@ module.exports = function (router) {
         } else {
           var student = session.student._id
           var volunteer = session.volunteer._id
+          // add session to the student and volunteer's information
           addSession(student, session)
           addSession(volunteer, session)
           session.endSession()
