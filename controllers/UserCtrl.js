@@ -51,7 +51,8 @@ module.exports = {
       'favoriteAcademicSubject',
       'extracurricularActivitesText',
       'referred',
-      'heardFrom'
+      'heardFrom',
+      'pastSessions'
     ].forEach(function (key) {
       if (data[key]) {
         update[key] = data[key]

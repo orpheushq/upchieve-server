@@ -255,6 +255,8 @@ var userSchema = new mongoose.Schema({
   },
   hasSchedule: false,
   timezone: String,
+  pastSessions:  [{type: mongoose.Schema.Types.ObjectId,
+    ref: 'Session'}],
 
   algebra: {
     passed: {
@@ -419,6 +421,7 @@ userSchema.methods.parseProfile = function () {
     preferredContactMethod: this.preferredContactMethod,
     availability: this.availability,
     hasSchedule: this.hasSchedule,
+    pastSessions: this.pastSessions,
 
     highschool: this.highschool,
     currentGrade: this.currentGrade,

@@ -1,4 +1,8 @@
 var SessionCtrl = require('../../controllers/SessionCtrl')
+
+var User = require('../../models/User')
+var Session = require('../../models/Session')
+
 var ObjectId = require('mongodb').ObjectId
 
 module.exports = function (router) {
@@ -27,11 +31,41 @@ module.exports = function (router) {
       }
     )
   })
-
+  function addSession(usertype, session) {
+    User.findById(usertype)
+      .populate({
+        path: 'pastSessions',
+        model: Session
+      })
+      .exec(function (err, user) {
+          if (err) {
+            return handleError(err)
+          }
+          else if (Array.isArray(user.pastSessions)) {
+            User.find({'pastSessions': session._id},
+              function (err, results) {
+                if (err) { 
+                  throw err
+                 }
+                if (!results.length) {
+                  console.log(results)
+                  user.pastSessions.push(session._id)
+                  user.save(function (err, user) {
+                    if (err) {
+                      throw err
+                    }
+                  });
+                }
+              })
+          }
+          else {
+            user.pastSessions = [session._id];
+        }
+      })
+  }
   router.route('/session/end').post(function (req, res) {
     var data = req.body || {}
     var sessionId = data.sessionId
-
     SessionCtrl.get(
       {
         sessionId: sessionId
@@ -42,6 +76,10 @@ module.exports = function (router) {
         } else if (!session) {
           res.json({ err: 'No session found' })
         } else {
+          var student = session.student._id
+          var volunteer = session.volunteer._id
+          addSession(student, session)
+          addSession(volunteer, session)
           session.endSession()
           res.json({ sessionId: session._id })
         }
