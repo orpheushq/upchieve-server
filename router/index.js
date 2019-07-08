@@ -2,6 +2,8 @@ var path = require('path')
 
 var config = require('../config')
 
+var errors = require('../errors')
+
 module.exports = function (app) {
   console.log('Initializing server routing')
 
@@ -23,7 +25,7 @@ module.exports = function (app) {
   // Check that Sentry is working
   if (config.NODE_ENV === 'dev') {
     app.get('/debug-sentry', function (req, res) {
-      throw new Error('Test of Sentry')
+      throw errors.generateError('ETEST', 'Test of Sentry')
     })
   }
 

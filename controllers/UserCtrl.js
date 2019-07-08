@@ -1,11 +1,15 @@
 var User = require('../models/User')
 
+var errors = require('../errors')
+
 module.exports = {
   get: function (options, callback) {
     var userId = options.userId
     User.findById(userId, function (err, user) {
-      if (err || !user) {
-        callback(new Error('Could not get user'))
+      if (err) {
+        callback(err)
+      } else if (!user) {
+        callback(errors.generateError(errors.ERR_USER_NOT_FOUND))
       } else {
         user.getProfile(callback)
       }
@@ -59,7 +63,7 @@ module.exports = {
       }
     })
     if (!hasUpdate) {
-      return callback(new Error('No fields defined to update'))
+      return callback(errors.generate(errors.ERR_INVALID_DATA, 'No fields defined to update'))
     }
 
     User.findByIdAndUpdate(userId, update, { new: true, runValidators: true }, function (err, user) {

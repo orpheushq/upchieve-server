@@ -7,7 +7,8 @@ var errors = {
   'EUIDNOTFOUND': 'No account with that id found.',
   'ESIDNOTFOUND': 'No session found',
   'ENOAUTH': 'Client has no authenticated session',
-  'EBADDATA': 'Invalid request data'
+  'EBADDATA': 'Invalid request data',
+  'EFORBID': 'User is not authorized to perform this action'
 }
 
 // Appropriate response status codes for errors with properties with the given names
@@ -18,7 +19,8 @@ var errorStatusCodes = {
     'EUIDNOTFOUND': 404,
     'ESIDNOTFOUND': 404,
     'ENOAUTH': 401,
-    'EBADDATA': 400
+    'EBADDATA': 400,
+    'EFORBID': 403
   },
   // Mongoose validation failure
   'name': { 'ValidationError': 400 },
@@ -31,7 +33,8 @@ var dontReport = [
   'EUIDNOTFOUND',
   'ESIDNOTFOUND',
   'ENOAUTH',
-  'EBADDATA'
+  'EBADDATA',
+  'EFORBID'
 ]
 
 // define a toJSON method that will serialize errors properly for transmission to client
@@ -87,6 +90,7 @@ module.exports = {
   ERR_SESSION_NOT_FOUND: 'ESIDNOTFOUND',
   ERR_NOT_AUTHENTICATED: 'ENOAUTH',
   ERR_INVALID_DATA: 'EBADDATA',
+  ERR_NOT_AUTHORIZED: 'EFORBID',
 
   dontReport
 }

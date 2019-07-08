@@ -3,6 +3,8 @@ var twilioService = require('../services/twilio')
 
 var sentry = require('@sentry/node')
 
+var errors = require('../errors')
+
 // A socket session tracks a session with its users and sockets
 var SocketSession = function (options) {
   this.session = options.session
@@ -180,11 +182,11 @@ module.exports = {
     var subTopic = options.subTopic
 
     if (!userId) {
-      cb(new Error('Cannot create a session without a user id'), null)
+      cb(errors.generateError(errors.ERR_INVALID_DATA, 'Cannot create a session without a user id'), null)
     } else if (user.isVolunteer) {
-      cb(new Error('Volunteers cannot create new sessions'), null)
+      cb(errors.generateError(errors.ERR_NOT_AUTHORIZED, 'Volunteers cannot create new sessions'), null)
     } else if (!type) {
-      cb(new Error('Must provide a type for a new session'), null)
+      cb(errors.generateError(errors.ERR_INVALID_DATA, 'Must provide a type for a new session'), null)
     }
 
     var session = new Session({
@@ -234,7 +236,7 @@ module.exports = {
       if (err) {
         return cb(err)
       } else if (!session) {
-        return cb(new Error('No session found!'))
+        return cb(errors.generateError(errors.ERR_SESSION_NOT_FOUND, 'No session found!'))
       }
 
       session.joinUser(user, function (err, savedSession) {

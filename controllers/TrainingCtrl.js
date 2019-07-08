@@ -1,6 +1,8 @@
 var Question = require('../models/Question')
 var User = require('../models/User')
 
+var errors = require('../errors')
+
 // change depending on how many of each subcategory are wanted
 var numQuestions = {
   algebra: 2,
@@ -111,7 +113,7 @@ module.exports = {
             return callback(err)
           }
           if (!user) {
-            return callback(new Error('No account with that id found.'))
+            return callback(errors.generateError(errors.ERR_USER_NOT_FOUND, 'No account with that id found.'))
           }
           user[category]['passed'] = hasPassed
           var tries = user[category]['tries']

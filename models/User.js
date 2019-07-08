@@ -4,6 +4,8 @@ var validator = require('validator')
 
 var config = require('../config.js')
 
+var errors = require('../errors')
+
 var userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -494,7 +496,7 @@ userSchema.statics.checkCode = function (code, cb) {
       volunteerCode: isVolunteerCode
     })
   } else {
-    cb(new Error('Registration code is invalid'), false)
+    cb(errors.generateError(errors.ERR_INVALID_DATA, 'Registration code is invalid'), false)
   }
 }
 

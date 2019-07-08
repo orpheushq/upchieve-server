@@ -5,6 +5,8 @@ var MailService = require('../services/MailService')
 
 var User = require('../models/User')
 
+var errors = require('../errors')
+
 module.exports = {
   initiateReset: function (options, callback) {
     var email = options.email
@@ -20,7 +22,7 @@ module.exports = {
             }
 
             if (!user) {
-              return done(new Error('No account with that id found.'))
+              return done(errors.generateError(errors.ERR_USER_NOT_FOUND, 'No account with that id found.'))
             }
 
             done(null, user)
@@ -70,13 +72,13 @@ module.exports = {
           User.findOne({ passwordResetToken: token }, function (err, user) {
             if (!user) {
               return done(
-                new Error('No user found with that password reset token')
+                errors.generateError(errors.ERR_INVALID_DATA, 'No user found with that password reset token')
               )
             } else if (err) {
               return done(err)
             } else if (user.email !== email) {
               return done(
-                new Error('Email did not match the password reset token')
+                errors.generateError(errors.ERR_INVALID_DATA, 'Email did not match the password reset token')
               )
             }
             done(null, user)
