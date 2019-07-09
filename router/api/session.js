@@ -58,6 +58,7 @@ module.exports = function (router) {
               }
             })
         } else {
+          // if the user has no sessions at all, initialize the array with the current session
           user.pastSessions = [session._id]
         }
       })
@@ -75,12 +76,12 @@ module.exports = function (router) {
         } else if (!session) {
           res.json({ err: 'No session found' })
         } else {
+          var student = session.student
+          var volunteer = session.volunteer
           // add session to the student and volunteer's information
-          var student = session.student._id
-          addSession(student, session)
-          if (session.volunteer) {
-            var volunteer = session.volunteer._id
-            addSession(volunteer, session)
+          addSession(student._id, session)
+          if (volunteer) {
+            addSession(volunteer._id, session)
           }
           session.endSession()
           res.json({ sessionId: session._id })
