@@ -11,6 +11,7 @@ function getProfileIfSuccessful (callback) {
   }
 }
 
+
 // helper to iterate through keys to be added to an update object
 function iterateKeys (update, data, callback) {
   var hasUpdate = false
@@ -69,6 +70,21 @@ module.exports = {
         callback('Could not get user')
       } else {
         user.getProfile(callback)
+      }
+    })
+  },
+
+  getUsers: function(callback){
+    User.find({}, function(err, users){
+      var userMap = {}
+      users.forEach(function(user){
+        userMap[user._id] = user.firstname
+      })
+      if(err){
+        return callback(err)
+      }
+      else{
+        return callback(userMap)
       }
     })
   },

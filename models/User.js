@@ -41,7 +41,7 @@ var userSchema = new mongoose.Schema({
   phone: {
     type: String,
     match: [ /^[0-9]{10}$/, '{VALUE} is not a phone number in the format ##########' ],
-    required: [function () { return this.isVolunteer }, 'Phone number is required.']
+    //required: [function () { return this.isVolunteer }, 'Phone number is required.']
   },
 
   highschool: { type: String, required: [function () { return !this.isVolunteer }, 'High school is required.'] },

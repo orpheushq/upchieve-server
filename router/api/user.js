@@ -1,4 +1,5 @@
-var UserCtrl = require('../../controllers/UserCtrl')
+//var UserCtrl = require('../../controllers/UserCtrl')
+var User = require('../../models/User')
 
 module.exports = function (router) {
   router.route('/user').get(function (req, res) {
@@ -11,6 +12,32 @@ module.exports = function (router) {
         err: 'Client has no authenticated session'
       })
     }
+  })
+  
+  router.post('/user/all', function (req, res){ //POST???
+    User.find({}).then(function (users) {
+      res.send(users)
+      })
+      
+      // users.forEach(function(user) {
+      //   userMap[user._id] = user;
+      // })
+      // res.send(userMap)
+    //})
+    // UserCtrl.getUsers({}, function(
+    //   err,
+    //   users
+    // ){
+    //   if(err){
+    //     res.json({err: err})
+    //   }
+    //   else{
+    //     res.json({
+    //       msg: 'Users retrieved from database',
+    //       users: users
+    //     })
+    //   }
+    // })
   })
 
   router.put('/user', function (req, res) {
