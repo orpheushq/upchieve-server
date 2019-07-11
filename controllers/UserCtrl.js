@@ -76,14 +76,16 @@ module.exports = {
 
   getUsers: function(callback){
     User.find({}, function(err, users){
-      var userMap = {}
-      users.forEach(function(user){
-        userMap[user._id] = user.firstname
-      })
       if(err){
         return callback(err)
       }
       else{
+        var userMap = {}
+        users.forEach(function(user) {
+          if(user.hasSchedule){
+            userMap[user._id] = user.availability;
+          }
+        })
         return callback(userMap)
       }
     })

@@ -1,5 +1,5 @@
 //var UserCtrl = require('../../controllers/UserCtrl')
-var User = require('../../models/User')
+var UserCtrl = require('../../controllers/UserCtrl')
 
 module.exports = function (router) {
   router.route('/user').get(function (req, res) {
@@ -15,21 +15,22 @@ module.exports = function (router) {
   })
   
   router.post('/user/all', function (req, res){ //POST???
-    User.find({}).then(function (users) {
-      res.send(users)
-      })
-      
-      // users.forEach(function(user) {
-      //   userMap[user._id] = user;
-      // })
-      // res.send(userMap)
-    //})
-    // UserCtrl.getUsers({}, function(
-    //   err,
-    //   users
-    // ){
-    //   if(err){
-    //     res.json({err: err})
+    UserCtrl.getUsers(function(
+      users,
+      err
+    ){
+      if (err) {
+        res.json({ err: err })
+      } else {
+        res.json({
+          msg: 'Users retreived from database',
+          users: users
+        })
+      }
+    })
+    // User.find({}).then(function (users) {
+    //   if(!users){
+    //     res.json({err: 'no users!'})
     //   }
     //   else{
     //     res.json({
@@ -37,6 +38,8 @@ module.exports = function (router) {
     //       users: users
     //     })
     //   }
+  
+     
     // })
   })
 

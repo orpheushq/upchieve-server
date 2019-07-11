@@ -41,7 +41,7 @@ var userSchema = new mongoose.Schema({
   phone: {
     type: String,
     match: [ /^[0-9]{10}$/, '{VALUE} is not a phone number in the format ##########' ],
-    //required: [function () { return this.isVolunteer }, 'Phone number is required.']
+    required: [function () { return this.isVolunteer }, 'Phone number is required.']
   },
 
   highschool: { type: String, required: [function () { return !this.isVolunteer }, 'High school is required.'] },
@@ -484,25 +484,25 @@ userSchema.methods.verifyPassword = function (candidatePassword, cb) {
   })
 }
 
-// virtual type for phone number formatted for readability
-userSchema.virtual('phonePretty')
-  .get(function () {
-    if (!this.phone) {
-      return null
-    }
+// // virtual type for phone number formatted for readability
+// userSchema.virtual('phonePretty')
+//   .get(function () {
+//     if (!this.phone) {
+//       return null
+//     }
 
-    var re = /^([0-9]{3})([0-9]{3})([0-9]{4})$/
-    var [, area, prefix, line] = this.phone.match(re)
-    return `${area}-${prefix}-${line}`
-  })
-  .set(function (v) {
-    // regular expression that accepts multiple valid U. S. phone number formats
-    // see http://regexlib.com/REDetails.aspx?regexp_id=58
-    // modified to ignore trailing/leading whitespace and disallow alphanumeric characters
-    var re = /^\s*(?:[0-9](?: |-)?)?(?:\(?([0-9]{3})\)?|[0-9]{3})(?: |-)?(?:([0-9]{3})(?: |-)?([0-9]{4}))\s*$/
-    var [, area, prefix, line] = v.match(re) || []
-    this.phone = `${area}${prefix}${line}`
-  })
+//     var re = /^([0-9]{3})([0-9]{3})([0-9]{4})$/
+//     var [, area, prefix, line] = this.phone.match(re)
+//     return `${area}-${prefix}-${line}`
+//   })
+//   .set(function (v) {
+//     // regular expression that accepts multiple valid U. S. phone number formats
+//     // see http://regexlib.com/REDetails.aspx?regexp_id=58
+//     // modified to ignore trailing/leading whitespace and disallow alphanumeric characters
+//     var re = /^\s*(?:[0-9](?: |-)?)?(?:\(?([0-9]{3})\)?|[0-9]{3})(?: |-)?(?:([0-9]{3})(?: |-)?([0-9]{4}))\s*$/
+//     var [, area, prefix, line] = v.match(re) || []
+//     this.phone = `${area}${prefix}${line}`
+//   })
 
 // Static method to determine if a registration code is valid
 userSchema.statics.checkCode = function (code, cb) {
