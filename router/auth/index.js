@@ -118,6 +118,7 @@ module.exports = function (app) {
     })
   })
 
+
   router.post('/register', function (req, res) {
     var email = req.body.email
 
@@ -274,13 +275,13 @@ module.exports = function (app) {
       {
         email: email
       },
-      function (err, data) {
+      function (err) {
         if (err) {
-          res.json({
-            err: err
+           res.json({
+            err: err.message
           })
         } else {
-          res.json({
+           res.json({
             msg: 'Password reset email sent'
           })
         }
@@ -288,6 +289,8 @@ module.exports = function (app) {
     )
   })
 
+
+  
   router.post('/reset/confirm', function (req, res) {
     
     var password = req.body.password
