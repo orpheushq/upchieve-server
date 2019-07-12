@@ -290,7 +290,6 @@ module.exports = function (app) {
 
   router.post('/reset/confirm', function (req, res) {
     
-
     var password = req.body.password
 
     var newpassword = req.body.newpassword
@@ -354,7 +353,6 @@ module.exports = function (app) {
     ResetPasswordCtrl.finishReset(
       {
         token: token,
-        email: email
       },
       function (err, user) {
         if (err) {
