@@ -74,19 +74,19 @@ module.exports = {
     })
   },
 
-  getUsers: function(callback){
+  getAllUserAvailability: function(callback){
     User.find({}, function(err, users){
       if(err){
         return callback(err)
       }
       else{
-        var userMap = {}
+        var userAvailabilityMap = {}
         users.forEach(function(user) {
           if(user.hasSchedule){
-            userMap[user._id] = user.availability;
+            userAvailabilityMap[user._id] = user.availability;
           }
         })
-        return callback(userMap)
+        return callback(userAvailabilityMap)
       }
     })
   },

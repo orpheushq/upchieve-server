@@ -14,9 +14,9 @@ module.exports = function (router) {
     }
   })
   
-  router.post('/user/all', function (req, res){ //POST???
-    UserCtrl.getUsers(function(
-      users,
+  router.post('/user/all', function (req, res){ 
+    UserCtrl.getAllUserAvailability(function(
+      userAvailabilityMap,
       err
     ){
       if (err) {
@@ -24,23 +24,10 @@ module.exports = function (router) {
       } else {
         res.json({
           msg: 'Users retreived from database',
-          users: users
+          userAvailabilityMap: userAvailabilityMap
         })
       }
     })
-    // User.find({}).then(function (users) {
-    //   if(!users){
-    //     res.json({err: 'no users!'})
-    //   }
-    //   else{
-    //     res.json({
-    //       msg: 'Users retrieved from database',
-    //       users: users
-    //     })
-    //   }
-  
-     
-    // })
   })
 
   router.put('/user', function (req, res) {
