@@ -8,7 +8,7 @@ const SessionCtrl = require('../../controllers/SessionCtrl.js')
 
 // Create an HTTPS server if in production, otherwise use HTTP.
 const createServer = app => {
-  if (config.NODE_ENV === 'production') {
+  if (config.NODE_ENV === 'production' && false) {
     return https.createServer(
       {
         key: fs.readFileSync(`${config.SSL_CERT_PATH}/privkey.pem`),
