@@ -375,6 +375,12 @@ var userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+
+  isVolunteerApproved: {
+    type: Boolean,
+    default: false
+  },
+
   isAdmin: {
     type: Boolean,
     default: false
@@ -410,6 +416,7 @@ userSchema.methods.parseProfile = function () {
     nickname: this.nickname,
     picture: this.picture,
     isVolunteer: this.isVolunteer,
+    isVolunteerApproved: this.isVolunteerApproved,
     isAdmin: this.isAdmin,
     referred: this.referred,
     createdAt: this.createdAt,
@@ -451,7 +458,9 @@ userSchema.methods.parseProfile = function () {
     precalculus: this.precalculus,
     calculus: this.calculus,
 
-    phonePretty: this.phonePretty
+    phonePretty: this.phonePretty,
+    hasAvailability: this.hasAvailability,
+    hasCertification: this.hasCertification
   }
 }
 
@@ -528,8 +537,43 @@ userSchema.virtual('phonePretty')
       // ignore first element of match result, which is the full match,
       // and destructure the remaining portion
       var [, area, prefix, line] = v.match(PHONE_REGEX) || []
-	  this.phone = `${area}${prefix}${line}`
+      this.phone = `${area}${prefix}${line}`
     }
+  })
+
+userSchema.virtual('hasAvailability')
+  .get(function () {
+    if (!this.availability) {
+      return null
+    }
+    var available = []
+    var days = Object.values(this.availability)
+    for (var day = 0; day < days.length; day++) {
+      available = available.concat(Object.values(days[day]).slice(1))
+    }
+    for (var i = 0; i < available.length; i++) {
+      if (available[i]) {
+        return true
+      }
+    }
+    return false
+  })
+
+userSchema.virtual('hasCertification')
+  .get(function () {
+    var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.college, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry]
+    for (var i = 0; i < subjects.length; i++) {
+      if (subjects[i].passed) {
+        return true
+      }
+    }
+    return false
+  })
+
+userSchema.virtual('isVolunteerReady')
+  .get(function () {
+    console.log('ready?', this.hasAvailability && this.hasCertification)
+    return this.hasAvailability && this.hasCertification
   })
 
 // Static method to determine if a registration code is valid
