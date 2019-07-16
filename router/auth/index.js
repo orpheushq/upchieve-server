@@ -123,8 +123,6 @@ module.exports = function (app) {
 
     var password = req.body.password
 
-    var code = req.body.code
-
     var highSchool = req.body.highSchool
 
     var college = req.body.college
@@ -138,6 +136,8 @@ module.exports = function (app) {
     var lastName = req.body.lastName
 
     var terms = req.body.terms
+
+    var userType = req.body.userType
 
     if (!terms) {
       return res.json({
@@ -161,15 +161,14 @@ module.exports = function (app) {
 
     var user = new User()
     user.email = email
-    user.isVolunteer = !(code === undefined)
-    user.registrationCode = code
+    user.isVolunteer = (userType === 'volunteer')
     user.highschool = highSchool
     user.college = college
     user.phonePretty = phone
     user.favoriteAcademicSubject = favoriteAcademicSubject
     user.firstname = firstName
     user.lastname = lastName
-    user.verified = code === undefined
+    user.verified = (userType === 'student')
 
     user.hashPassword(password, function (err, hash) {
       user.password = hash // Note the salt is embedded in the final hash
@@ -238,28 +237,6 @@ module.exports = function (app) {
           })
         }
       })
-    })
-  })
-
-  router.post('/register/check', function (req, res) {
-    var code = req.body.code
-    console.log(code)
-    if (!code) {
-      res.json({
-        err: 'No registration code given'
-      })
-      return
-    }
-    User.checkCode(code, function (err, data) {
-      if (err) {
-        res.json({
-          err: err
-        })
-      } else {
-        res.json({
-          valid: data.studentCode || data.volunteerCode
-        })
-      }
     })
   })
 

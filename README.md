@@ -178,7 +178,6 @@ Create a new account based on the information posted.
 {
   "email": "String",
   "password": "String",
-  "code": "String",
   "highSchool": "String",
   "firstName": "String",
   "lastName": "String"

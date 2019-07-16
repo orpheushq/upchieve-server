@@ -14,9 +14,6 @@
     "UPCHIEVE_CLIENT_PORT": {
       "required": true
     },
-    "UPCHIEVE_CURRENT_VOLUNTEER_REGISTRATION_CODE": {
-      "required": true
-    },
     "UPCHIEVE_NOREPLY_SENDER": {
       "required": true
     },

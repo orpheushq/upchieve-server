@@ -50,8 +50,7 @@ var getAvailableVolunteersFromDb = function (subtopic) {
 
   var userQuery = {
     [certificationPassed]: true,
-    [availability]: true,
-    registrationCode: 'COACH18'
+    [availability]: true
   }
 
   var query = User.find(userQuery)

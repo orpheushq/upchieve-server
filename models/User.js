@@ -23,7 +23,6 @@ var userSchema = new mongoose.Schema({
     default: false
   },
   verificationToken: String,
-  registrationCode: String,
   passwordResetToken: String,
 
   // Profile data
@@ -250,7 +249,7 @@ var userSchema = new mongoose.Schema({
       '11p': Boolean
     }
   },
-  hasSchedule: false,
+
   timezone: String,
 
   algebra: {
@@ -431,7 +430,6 @@ userSchema.methods.parseProfile = function () {
     phone: this.phone,
     preferredContactMethod: this.preferredContactMethod,
     availability: this.availability,
-    hasSchedule: this.hasSchedule,
 
     highschool: this.highschool,
     currentGrade: this.currentGrade,
@@ -543,17 +541,16 @@ userSchema.virtual('phonePretty')
 
 userSchema.virtual('hasAvailability')
   .get(function () {
-    if (!this.availability) {
-      return null
-    }
-    var available = []
-    var days = Object.values(this.availability)
-    for (var day = 0; day < days.length; day++) {
-      available = available.concat(Object.values(days[day]).slice(1))
-    }
-    for (var i = 0; i < available.length; i++) {
-      if (available[i]) {
-        return true
+    if (this.isVolunteer) {
+      var available = []
+      var days = Object.values(this.availability)
+      for (var day = 0; day < days.length; day++) {
+        available = available.concat(Object.values(days[day]).slice(1))
+      }
+      for (var i = 0; i < available.length; i++) {
+        if (available[i]) {
+          return true
+        }
       }
     }
     return false
@@ -561,10 +558,12 @@ userSchema.virtual('hasAvailability')
 
 userSchema.virtual('hasCertification')
   .get(function () {
-    var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.college, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry]
-    for (var i = 0; i < subjects.length; i++) {
-      if (subjects[i].passed) {
-        return true
+    if (this.isVolunteer) {
+      var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry]
+      for (var i = 0; i < subjects.length; i++) {
+        if (subjects[i].passed) {
+          return true
+        }
       }
     }
     return false
@@ -572,25 +571,7 @@ userSchema.virtual('hasCertification')
 
 userSchema.virtual('isVolunteerReady')
   .get(function () {
-    console.log('ready?', this.hasAvailability && this.hasCertification)
     return this.hasAvailability && this.hasCertification
   })
-
-// Static method to determine if a registration code is valid
-userSchema.statics.checkCode = function (code, cb) {
-  var volunteerCodes = config.VOLUNTEER_CODES.split(',')
-
-  var isVolunteerCode = volunteerCodes.some(function (volunteerCode) {
-    return volunteerCode.toUpperCase() === code.toUpperCase()
-  })
-
-  if (isVolunteerCode) {
-    cb(null, {
-      volunteerCode: isVolunteerCode
-    })
-  } else {
-    cb('Registration code is invalid', false)
-  }
-}
 
 module.exports = mongoose.model('User', userSchema)
