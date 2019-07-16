@@ -250,7 +250,7 @@ var userSchema = new mongoose.Schema({
       '11p': Boolean
     }
   },
-  hasSchedule: false,
+
   timezone: String,
 
   algebra: {
@@ -431,7 +431,6 @@ userSchema.methods.parseProfile = function () {
     phone: this.phone,
     preferredContactMethod: this.preferredContactMethod,
     availability: this.availability,
-    hasSchedule: this.hasSchedule,
 
     highschool: this.highschool,
     currentGrade: this.currentGrade,
