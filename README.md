@@ -35,9 +35,12 @@ UPchieve web server
     - [GET /api/user](#get-apiuser)
     - [PUT /api/user](#put-apiuser)
     - [GET /api/user/:id](#get-apiuserid)
+    - [POST /api/volunteers](#post-apivolunteers)
+    - [POST /api/volunteers/availability](#post-apivolunteersavailibility)
     - [POST /api/verify/send](#post-apiverifysend)
     - [POST /api/verify/confirm](#post-apiverifyconfirm)
     - [POST /moderate/message](#post-moderatemessage)
+
 
 
 Local Development
@@ -302,6 +305,14 @@ Returns a sanitized public user record for a user with the given id. May perform
 checks on the authorization level of the current user to strip out priveliged
 information.
 
+### POST /api/volunteers
+
+Returns an object with all the users who are volunteers. All the keys are user ids.
+
+### POST /api/volunteers/availability
+
+Returns a map with the availability of all the volunteers. All the keys are user ids.
+
 ### POST /api/verify/send
 
 Sends an email to verify the current user with unique hash. The email provided
@@ -343,3 +354,5 @@ The response body looks like this if no error occurred:
   "isClean": true // or false
 }
 ```
+
+
