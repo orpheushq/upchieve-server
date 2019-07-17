@@ -13,23 +13,8 @@ module.exports = function (router) {
       })
     }
   })
-  
-  router.post('/user/all', function (req, res){ 
-    UserCtrl.getAllUserAvailability(function(
-      userAvailabilityMap,
-      err
-    ){
-      if (err) {
-        res.json({ err: err })
-      } else {
-        res.json({
-          msg: 'Users retreived from database',
-          userAvailabilityMap: userAvailabilityMap
-        })
-      }
-    })
-  })
 
+  
   router.put('/user', function (req, res) {
     var data = req.body || {}
     UserCtrl.update(

@@ -74,22 +74,7 @@ module.exports = {
     })
   },
 
-  getAllUserAvailability: function(callback){
-    User.find({}, function(err, users){
-      if(err){
-        return callback(err)
-      }
-      else{
-        var userAvailabilityMap = {}
-        users.forEach(function(user) {
-          if(user.hasSchedule){
-            userAvailabilityMap[user._id] = user.availability;
-          }
-        })
-        return callback(userAvailabilityMap)
-      }
-    })
-  },
+  
   update: function (options, callback) {
     var userId = options.userId
 
