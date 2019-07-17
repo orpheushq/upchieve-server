@@ -1,4 +1,3 @@
-//var UserCtrl = require('../../controllers/UserCtrl')
 var UserCtrl = require('../../controllers/UserCtrl')
 
 module.exports = function (router) {
