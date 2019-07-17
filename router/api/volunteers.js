@@ -1,9 +1,8 @@
 var VolunteersCtrl = require('../../controllers/VolunteersCtrl')
 
 module.exports = function (router) {
-  router.post('/volunteers/availability', function (req, res) {
-    console.log(req.params.subject)
-    VolunteersCtrl.getVolunteersAvailability({ subject: req.body.subject }, function (
+  router.post('/admin/volunteers/availability', function (req, res) {
+    VolunteersCtrl.getVolunteersAvailability(function (
       userAvailabilityMap,
       err
     ) {
@@ -18,7 +17,7 @@ module.exports = function (router) {
     })
   })
 
-  router.post('/volunteers', function (req, res) {
+  router.post('admin/volunteers', function (req, res) {
     VolunteersCtrl.getVolunteers(function (
       volunteers,
       err

@@ -1,7 +1,7 @@
 var User = require('../models/User')
 
 module.exports = {
-getVolunteersAvailability: function(subject, callback){
+getVolunteersAvailability: function(callback){
     User.find({}, function(err, users){
       if(err){
         return callback(err)
@@ -9,7 +9,7 @@ getVolunteersAvailability: function(subject, callback){
       else{
         var userAvailabilityMap = {}
         users.forEach(function(user) {
-          if(user.hasSchedule && user.isVolunteer && user[subject]){
+          if(user.hasSchedule && user.isVolunteer){
             userAvailabilityMap[user._id] = user.availability;
           }
         })
