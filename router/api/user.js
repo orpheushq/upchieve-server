@@ -1,4 +1,3 @@
-//var UserCtrl = require('../../controllers/UserCtrl')
 var UserCtrl = require('../../controllers/UserCtrl')
 
 module.exports = function (router) {
@@ -14,7 +13,6 @@ module.exports = function (router) {
     }
   })
 
-  
   router.put('/user', function (req, res) {
     var data = req.body || {}
     UserCtrl.update(
