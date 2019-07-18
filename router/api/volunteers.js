@@ -2,19 +2,21 @@ var VolunteersCtrl = require('../../controllers/VolunteersCtrl')
 
 module.exports = function (router) {
   router.post('/admin/volunteers/availability', function (req, res) {
-    VolunteersCtrl.getVolunteersAvailability(function (
-      userAvailabilityMap,
-      err
-    ) {
-      if (err) {
-        res.json({ err: err })
-      } else {
-        res.json({
-          msg: 'Users retreived from database',
-          userAvailabilityMap: userAvailabilityMap
-        })
-      }
-    })
+    var certifiedSubject = req.body.certifiedSubject
+    VolunteersCtrl.getVolunteersAvailability(
+      {
+        certifiedSubject: certifiedSubject
+      },
+      function (err, userAvailabilityMap) {
+        if (err) {
+          res.json({ err: err })
+        } else {
+          res.json({
+            msg: 'Users retreived from database',
+            userAvailabilityMap: userAvailabilityMap
+          })
+        }
+      })
   })
 
   router.post('admin/volunteers', function (req, res) {
