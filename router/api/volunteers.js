@@ -12,7 +12,6 @@ module.exports = function (router) {
         err
       ) {
         if (err) {
-          console.log('here')
           res.json({ err: err })
         } else {
           res.json({
