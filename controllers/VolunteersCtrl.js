@@ -3,15 +3,14 @@ var User = require('../models/User')
 module.exports = {
   getVolunteersAvailability: function (options, callback) {
     var certifiedSubjectQuery = options.certifiedSubject + '.passed'
+    console.log(options.certifiedSubject)
     User.find({ isVolunteer: true, hasSchedule: true, [certifiedSubjectQuery]: true }, function (err, users) {
       if (err) {
         return callback(err, null)
       } else {
         var userAvailabilityMap = {}
         users.forEach(function (user) {
-          // if (user[certifiedSubject].passed) {
           userAvailabilityMap[user._id] = user.availability
-          // }
         })
         return callback(null, userAvailabilityMap)
       }
