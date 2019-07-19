@@ -13,7 +13,6 @@ module.exports = function (router) {
     }
   })
 
-  
   router.put('/user', function (req, res) {
     var data = req.body || {}
     UserCtrl.update(

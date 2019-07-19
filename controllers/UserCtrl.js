@@ -11,7 +11,6 @@ function getProfileIfSuccessful (callback) {
   }
 }
 
-
 // helper to iterate through keys to be added to an update object
 function iterateKeys (update, data, callback) {
   var hasUpdate = false

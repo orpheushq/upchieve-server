@@ -1,15 +1,18 @@
 var VolunteersCtrl = require('../../controllers/VolunteersCtrl')
 
 module.exports = function (router) {
-  router.get('/admin/volunteers/availability/:certifiedSubject', function (req, res) {
-    console.log(req.params)
+  router.get('/volunteers/availability/:certifiedSubject', function (req, res) {
     var certifiedSubject = req.params.certifiedSubject
     VolunteersCtrl.getVolunteersAvailability(
       {
         certifiedSubject: certifiedSubject
       },
-      function (err, userAvailabilityMap) {
+      function (
+        userAvailabilityMap,
+        err
+      ) {
         if (err) {
+          console.log('here')
           res.json({ err: err })
         } else {
           res.json({
@@ -20,7 +23,7 @@ module.exports = function (router) {
       })
   })
 
-  router.get('admin/volunteers', function (req, res) {
+  router.get('/volunteers', function (req, res) {
     VolunteersCtrl.getVolunteers(function (
       volunteers,
       err
