@@ -8,7 +8,7 @@ module.exports = function (router) {
         certifiedSubject: certifiedSubject
       },
       function (
-        userAvailabilityMap,
+        aggAvailabilities,
         err
       ) {
         if (err) {
@@ -16,7 +16,7 @@ module.exports = function (router) {
         } else {
           res.json({
             msg: 'Users retreived from database',
-            userAvailabilityMap: userAvailabilityMap
+            aggAvailabilities: aggAvailabilities
           })
         }
       })
