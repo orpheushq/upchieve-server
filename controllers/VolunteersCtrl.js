@@ -46,10 +46,11 @@ function addHeaders () {
 
 module.exports = {
   getVolunteersAvailability: function (options, callback) {
-    // resetting variables
+    // defining and resetting variables
     aggAvailabilities.table = Array(8).fill(0).map(() => Array(25).fill(0))
     aggAvailabilities.min = null
     aggAvailabilities.max = 0
+    aggAvailabilities.table[0][0] = ''
 
     var certifiedSubjectQuery = options.certifiedSubject + '.passed'
     User.find({ isVolunteer: true, hasSchedule: true, [certifiedSubjectQuery]: true }, function (err, users) {
@@ -66,17 +67,11 @@ module.exports = {
   },
 
   getVolunteers: function (callback) {
-    User.find({}, function (err, users) {
+    User.find({ isVolunteer: true }, function (err, users) {
       if (err) {
-        return callback(err)
+        return callback(null, err)
       } else {
-        var usersToReturn = {}
-        users.forEach(function (user) {
-          if (user.isVolunteer) {
-            usersToReturn[user._id] = user
-          }
-        })
-        return callback(usersToReturn)
+        return callback(users, null)
       }
     })
   }
