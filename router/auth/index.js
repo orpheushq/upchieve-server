@@ -156,7 +156,7 @@ module.exports = function (app) {
     user.registrationCode = code
     user.highschool = highSchool
     user.college = college
-    user.phone = phone
+    user.phonePretty = phone
     user.favoriteAcademicSubject = favoriteAcademicSubject
     user.firstname = firstName
     user.lastname = lastName
@@ -328,7 +328,7 @@ module.exports = function (app) {
               user.password = hash // Note the salt is embedded in the final hash
               user.save(function (err) {
                 if (err) {
-                  next(err)
+                  return next(err)
                 }
                 return res.json({
                   user: user
