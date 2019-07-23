@@ -1,6 +1,7 @@
 var VolunteersCtrl = require('../../controllers/VolunteersCtrl')
+var passport = require('../auth/passport')
 
-module.exports = function (passport, router) {
+module.exports = function (router) {
   router.get('/volunteers',
     passport.isAdmin,
     function (req, res) {
