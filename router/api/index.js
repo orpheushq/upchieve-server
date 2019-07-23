@@ -6,7 +6,7 @@ module.exports = function (app) {
 
   var router = new express.Router()
 
-  require('./volunteers')(router)
+  require('./volunteers')(passport, router)
   require('./user')(router)
   require('./verify')(router)
   require('./session')(router)
