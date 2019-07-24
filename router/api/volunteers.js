@@ -50,4 +50,20 @@ module.exports = function (router) {
         }
       })
   })
+  router.get('/volunteers/:id', function (req, res) {
+    var data = req.params
+    VolunteersCtrl.getVolunteer(
+      {
+        userId: data.id
+      },
+      function (volunteer, err) {
+        if (err) {
+          res.json({ err: err })
+        } else {
+          res.json({
+            volunteer: volunteer
+          })
+        }
+      })
+  })
 }

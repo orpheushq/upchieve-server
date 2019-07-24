@@ -37,5 +37,16 @@ module.exports = {
     } else {
       User.findByIdAndUpdate(userId, update, { new: true, runValidators: true }, callback)
     }
+  },
+
+  getVolunteer: function (options, callback) {
+    var userId = options.userId
+    User.findById(userId, function (err, volunteer) {
+      if (err || !volunteer) {
+        callback('Could not get volunteer')
+      } else {
+        return callback(volunteer)
+      }
+    })
   }
 }
