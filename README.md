@@ -307,11 +307,11 @@ Returns a sanitized public user record for a user with the given id. May perform
 checks on the authorization level of the current user to strip out priveliged
 information.
 
-### POST /api/volunteers
+### GET /api/volunteers
 
 Returns an object with all the users who are volunteers. All the keys are user ids.
 
-### POST /api/volunteers/availability
+### GET /api/volunteers/availability
 
 Returns a map with the availability of all the volunteers. All the keys are user ids.
 

@@ -3,8 +3,8 @@ var VolunteersCtrl = require('../../controllers/VolunteersCtrl')
 module.exports = function (router) {
   router.get('/volunteers/availability', function (req, res) {
     VolunteersCtrl.getVolunteersAvailability(function (
-      userAvailabilityMap,
-      err
+      err,
+      userAvailabilityMap
     ) {
       if (err) {
         res.json({ err: err })
@@ -31,5 +31,23 @@ module.exports = function (router) {
         })
       }
     })
+  })
+
+  router.post('/volunteers/:id', function (req, res) {
+    var data = req.body
+    VolunteersCtrl.editVolunteer(
+      {
+        userId: data._id,
+        data: data
+      },
+      function (volunteer, err) {
+        if (err) {
+          res.json({ err: err })
+        } else {
+          res.json({
+            volunteer: volunteer
+          })
+        }
+      })
   })
 }
