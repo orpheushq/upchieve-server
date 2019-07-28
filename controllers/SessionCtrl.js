@@ -195,9 +195,7 @@ module.exports = {
       subTopic: subTopic
     })
 
-    if (!user.isTestUser) {
-      twilioService.notify(type, subTopic)
-    }
+    twilioService.notify(type, subTopic, { isTestUserRequest: user.isTestUser })
 
     session.save(cb)
   },
@@ -245,6 +243,8 @@ module.exports = {
           sessionManager.disconnect({
             socket: socket
           })
+          cb(err)
+          return
         }
         Session.populate(savedSession, 'student volunteer', function (
           err,

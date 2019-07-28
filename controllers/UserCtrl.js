@@ -9,7 +9,7 @@ function getProfileIfSuccessful (callback) {
       return callback(err)
     } else if (!user) {
       return callback(errors.generateError(
-        errors.ERR_USER_NOT_FOUND, 
+        errors.ERR_USER_NOT_FOUND,
         'No account with that id found'
       ))
     } else {
@@ -62,7 +62,10 @@ function iterateKeys (update, data, callback) {
   })
 
   if (!hasUpdate) {
-    callback('No fields defined to update')
+    callback(errors.generateError(
+      errors.ERR_INVALID_DATA,
+      'No fields defined to update'
+    ))
   } else {
     callback(null, update)
   }
@@ -114,7 +117,10 @@ module.exports = {
     } else {
       iterateKeys(update, data, function (err, update) {
         if (err) {
-          return callback('No fields defined to update')
+          return callback(errors.generateError(
+            errors.ERR_INVALID_DATA,
+            'No fields defined to update'
+          ))
         }
         // update the document directly (more efficient, but ignores virtual props)
         User.findByIdAndUpdate(userId, update, { new: true, runValidators: true }, getProfileIfSuccessful(callback))

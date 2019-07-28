@@ -3,6 +3,8 @@ var errors = require('../../errors')
 var SessionCtrl = require('../../controllers/SessionCtrl')
 var ObjectId = require('mongodb').ObjectId
 
+var helpers = require('./helpers.js')
+
 module.exports = function (router) {
   router.route('/session/new').post(function (req, res, next) {
     var data = req.body || {}
@@ -41,6 +43,9 @@ module.exports = function (router) {
           next(err)
         } else if (!session) {
           next(errors.generateError(errors.ERR_SESSION_NOT_FOUND))
+        } else if (helpers.isNotSessionParticipant(session, req.user)) {
+          console.log([req.user._id])
+          next(errors.generateError(errors.ERR_NOT_AUTHORIZED))
         } else {
           session.endSession()
           res.json({ sessionId: session._id })

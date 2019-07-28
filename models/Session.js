@@ -4,6 +4,8 @@ var sentry = require('@sentry/node')
 
 var Message = require('./Message')
 
+var errors = require('../errors')
+
 var validTypes = ['Math', 'College']
 
 var sessionSchema = new mongoose.Schema({
@@ -92,16 +94,37 @@ sessionSchema.methods.saveWhiteboardUrl = function (whiteboardUrl, cb) {
   })
 }
 
-//
+// this method should callback with an error on attempts to join by non-participants
+// so that SessionCtrl knows to disconnect the socket
 sessionSchema.methods.joinUser = function (user, cb) {
   if (user.isVolunteer) {
-    this.volunteer = user
+    if (this.volunteer) {
+      if (!this.volunteer._id.equals(user._id)) {
+        cb(errors.generateError(
+          errors.ERR_NOT_AUTHORIZED,
+          'A volunteer has already joined this session.'
+        ))
+        return
+      }
+    } else {
+      this.volunteer = user
+    }
     this.volunteerJoinedAt = new Date()
+  } else if (this.student) {
+    if (!this.student._id.equals(user._id)) {
+      cb(errors.generateError(
+        errors.ERR_NOT_AUTHORIZED,
+        `A student ${this.student._id} has already joined this session.`
+      ))
+      return
+    }
   } else {
     this.student = user
   }
+
   this.save(cb)
 }
+
 sessionSchema.methods.leaveUser = function (user, cb) {
   // below should not save volunteer/user to null, we need to be able to see who the volunteer and student user were
   // should set this.endedAt to Date.now and end the session, both users see the session ended regardless of who ended it
