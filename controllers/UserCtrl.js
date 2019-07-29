@@ -11,57 +11,75 @@ function getProfileIfSuccessful (callback) {
   }
 }
 
-// helper to iterate through keys to be added to an update object
-function iterateKeys (update, data, callback) {
-  var hasUpdate = false
-
-  ;[
-    'firstname',
-    'lastname',
-    'nickname',
-    'picture',
-    'birthdate',
-    'serviceInterests',
-    'gender',
-    'race',
-    'groupIdentification',
-    'computerAccess',
-    'preferredTimes',
-    'phone',
-    'highschool',
-    'currentGrade',
-    'expectedGraduation',
-    'difficultAcademicSubject',
-    'difficultCollegeProcess',
-    'highestLevelEducation',
-    'hasGuidanceCounselor',
-    'gpa',
-    'college',
-    'collegeApplicationsText',
-    'commonCollegeDocs',
-    'academicInterestsText',
-    'testScoresText',
-    'advancedCoursesText',
-    'favoriteAcademicSubject',
-    'extracurricularActivitesText',
-    'referred',
-    'heardFrom',
-    'phonePretty'
-  ].forEach(function (key) {
-    if (data[key]) {
-      update[key] = data[key]
-      hasUpdate = true
-    }
-  })
-
-  if (!hasUpdate) {
-    callback('No fields defined to update')
-  } else {
-    callback(null, update)
-  }
-}
-
 module.exports = {
+  // helper to iterate through keys to be added to an update object
+  iterateKeys: function (update, data, callback) {
+    var hasUpdate = false
+    console.log(data['geometry']['passed'])
+
+    ;[
+      'firstname',
+      'lastname',
+      'email',
+      'nickname',
+      'picture',
+      'birthdate',
+      'serviceInterests',
+      'gender',
+      'race',
+      'groupIdentification',
+      'computerAccess',
+      'preferredTimes',
+      'phone',
+      'highschool',
+      'currentGrade',
+      'expectedGraduation',
+      'difficultAcademicSubject',
+      'difficultCollegeProcess',
+      'highestLevelEducation',
+      'hasGuidanceCounselor',
+      'gpa',
+      'college',
+      'collegeApplicationsText',
+      'commonCollegeDocs',
+      'academicInterestsText',
+      'testScoresText',
+      'advancedCoursesText',
+      'favoriteAcademicSubject',
+      'extracurricularActivitesText',
+      'referred',
+      'heardFrom',
+      'phonePretty',
+      'isTestUser',
+      'isAdmin',
+      'isVolunteerApproved',
+      'algebra',
+      'applications',
+      'biology',
+      'calculus',
+      'chemistry',
+      'esl',
+      'essays',
+      'geometry',
+      'precalculus',
+      'trigonometry',
+      'planning'
+    ].forEach(function (key) {
+      if (data.hasOwnProperty(key)) {
+        if (data[key].hasOwnProperty('passed')) {
+          update[key]['passed'] = data[key]['passed']
+        }
+        update[key] = data[key]
+        hasUpdate = true
+      }
+    })
+
+    if (!hasUpdate) {
+      callback('No fields defined to update')
+    } else {
+      callback(null, update)
+    }
+  },
   get: function (options, callback) {
     var userId = options.userId
     User.findById(userId, function (err, user) {
@@ -73,7 +91,6 @@ module.exports = {
     })
   },
 
-  
   update: function (options, callback) {
     var userId = options.userId
 

@@ -570,7 +570,7 @@ userSchema.virtual('hasAvailability')
 userSchema.virtual('hasCertification')
   .get(function () {
     if (this.isVolunteer) {
-      var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry]
+      var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry, this.planning]
       for (var i = 0; i < subjects.length; i++) {
         if (subjects[i].passed) {
           return true
