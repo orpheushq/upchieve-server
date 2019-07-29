@@ -458,7 +458,8 @@ userSchema.methods.parseProfile = function () {
 
     phonePretty: this.phonePretty,
     hasAvailability: this.hasAvailability,
-    hasCertification: this.hasCertification
+    hasCertification: this.hasCertification,
+    numberOfHours: this.numberOfHours
   }
 }
 
@@ -574,4 +575,21 @@ userSchema.virtual('isVolunteerReady')
     return this.hasAvailability && this.hasCertification
   })
 
+userSchema.virtual('numberOfHours')
+  .get(function () {
+    if (this.isVolunteer) {
+      var available = []
+      var days = Object.values(this.availability)
+      var hours = 0
+      for (var day = 0; day < days.length; day++) {
+        available = available.concat(Object.values(days[day]).slice(1))
+      }
+      for (var i = 0; i < available.length; i++) {
+        if (available[i]) {
+          hours++
+        }
+      }
+    }
+    return hours
+  })
 module.exports = mongoose.model('User', userSchema)
