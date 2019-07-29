@@ -118,6 +118,28 @@ module.exports = function (app) {
     })
   })
 
+  router.post('/checkemail', function (req, res) {
+    var email = req.body.email
+    var id = req.body.userid
+
+    if (!email) {
+      return res.json({
+        err: 'Must supply an email'
+      })
+    }
+    User.find({ email: email, _id: { $ne: id } }, function (req, users) {
+      if (users.length === 0) {
+        return res.json({
+          checked: true
+        })
+      } else {
+        return res.json({
+          err: 'The email address you entered is already in use'
+        })
+      }
+    })
+  })
+
   router.post('/register', function (req, res) {
     var email = req.body.email
 

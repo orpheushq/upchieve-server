@@ -20,6 +20,7 @@ module.exports = {
     ;[
       'firstname',
       'lastname',
+      'email',
       'nickname',
       'picture',
       'birthdate',
