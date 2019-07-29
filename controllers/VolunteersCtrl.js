@@ -38,7 +38,7 @@ module.exports = {
     var update = {}
 
     // Keys to virtual properties
-    var virtualProps = ['phonePretty']
+    var virtualProps = ['hasCertification', 'phonePretty']
 
     // if updating a virtual property
     if (virtualProps.some(function (key) { return data[key] })) {

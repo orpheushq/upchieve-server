@@ -53,11 +53,16 @@ module.exports = {
       'isTestUser',
       'isAdmin',
       'isVolunteerApproved',
-      'geometry',
       'algebra',
-      'calculus',
-      'trigonometry',
       'applications',
+      'biology',
+      'calculus',
+      'chemistry',
+      'esl',
+      'essays',
+      'geometry',
+      'precalculus',
+      'trigonometry',
       'planning'
     ].forEach(function (key) {
       if (data.hasOwnProperty(key)) {

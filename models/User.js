@@ -380,6 +380,15 @@ var userSchema = new mongoose.Schema({
     default: false
   },
 
+  /* Fake Users
+   * These aren't the same as Test Users; they still receive Twilio texts, etc
+   * Fake Users are real, fully functional accounts that we decide not to track because they've been
+   * identified as accounts that aren't actual students/volunteers; just people trying out the service.
+   */
+  isFakeUser: {
+    type: Boolean,
+    default: false
+  },
   isAdmin: {
     type: Boolean,
     default: false
@@ -448,6 +457,7 @@ userSchema.methods.parseProfile = function () {
     extracurricularActivitesText: this.extracurricularActivitesText,
     favoriteAcademicSubject: this.favoriteAcademicSubject,
     heardFrom: this.heardFrom,
+    isFakeUser: this.isFakeUser,
 
     algebra: this.algebra,
     geometry: this.geometry,
@@ -455,10 +465,8 @@ userSchema.methods.parseProfile = function () {
     esl: this.esl,
     precalculus: this.precalculus,
     calculus: this.calculus,
+    phonePretty: this.phonePretty
 
-    phonePretty: this.phonePretty,
-    hasAvailability: this.hasAvailability,
-    hasCertification: this.hasCertification
   }
 }
 
@@ -559,7 +567,7 @@ userSchema.virtual('hasAvailability')
 userSchema.virtual('hasCertification')
   .get(function () {
     if (this.isVolunteer) {
-      var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry]
+      var subjects = [this.algebra, this.applications, this.biology, this.calculus, this.chemistry, this.esl, this.essays, this.geometry, this.precalculus, this.trigonometry, this.planning]
       for (var i = 0; i < subjects.length; i++) {
         if (subjects[i].passed) {
           return true
