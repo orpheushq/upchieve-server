@@ -380,6 +380,15 @@ var userSchema = new mongoose.Schema({
     default: false
   },
 
+  /* Fake Users
+   * These aren't the same as Test Users; they still receive Twilio texts, etc
+   * Fake Users are real, fully functional accounts that we decide not to track because they've been
+   * identified as accounts that aren't actual students/volunteers; just people trying out the service.
+   */
+  isFakeUser: {
+    type: Boolean,
+    default: false
+  },
   isAdmin: {
     type: Boolean,
     default: false
@@ -448,6 +457,7 @@ userSchema.methods.parseProfile = function () {
     extracurricularActivitesText: this.extracurricularActivitesText,
     favoriteAcademicSubject: this.favoriteAcademicSubject,
     heardFrom: this.heardFrom,
+    isFakeUser: this.isFakeUser,
 
     algebra: this.algebra,
     geometry: this.geometry,
