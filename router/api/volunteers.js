@@ -2,24 +2,6 @@ var VolunteersCtrl = require('../../controllers/VolunteersCtrl')
 var passport = require('../auth/passport')
 
 module.exports = function (router) {
-  router.get('/volunteers/availability',
-    passport.isAdmin,
-    function (req, res) {
-      VolunteersCtrl.getVolunteersAvailability(function (
-        err,
-        userAvailabilityMap
-      ) {
-        if (err) {
-          res.json({ err: err })
-        } else {
-          res.json({
-            msg: 'Users retreived from database',
-            userAvailabilityMap: userAvailabilityMap
-          })
-        }
-      })
-    })
-
   router.get('/volunteers',
     passport.isAdmin,
     function (req, res) {
