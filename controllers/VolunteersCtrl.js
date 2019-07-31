@@ -20,9 +20,9 @@ function aggregateAvailabilities (availability, aggAvailabilities) {
           aggAvailabilities.timesOfDay = Object.keys(availability[day])
           aggAvailabilities.timesOfDay.shift() // gets rid of $init enum param
         }
-        // adds 1 to leave room for headers
-        let dayIndex = aggAvailabilities.daysOfWeek.indexOf(day) + 1
-        let timeIndex = aggAvailabilities.timesOfDay.indexOf(time) + 1
+        // gets corresponding day and time index inorder to store in aggAvailabilities table
+        let dayIndex = aggAvailabilities.daysOfWeek.indexOf(day)
+        let timeIndex = aggAvailabilities.timesOfDay.indexOf(time)
 
         if (availability[day][time]) {
           aggAvailabilities.table[dayIndex][timeIndex]++
@@ -35,25 +35,8 @@ function aggregateAvailabilities (availability, aggAvailabilities) {
 
 function findMinAndMax (aggAvailabilities) {
   let flatTable = aggAvailabilities.table.flat()
-  var filtered = flatTable.filter(function (item) {
-    return !isNaN(item)
-  })
-  filtered.shift() // gets rid of top left empty cell
-  aggAvailabilities.min = Math.min.apply(Math, filtered)
-  aggAvailabilities.max = Math.max.apply(Math, filtered)
-  return aggAvailabilities
-}
-
-/**
- * Helper function to add headers to the table once table is created
- */
-function addHeaders (aggAvailabilities) {
-  for (var dayIndex = 0; dayIndex < aggAvailabilities.daysOfWeek.length; dayIndex++) {
-    aggAvailabilities.table[dayIndex + 1][0] = aggAvailabilities.daysOfWeek[dayIndex]
-  }
-  for (var timeIndex = 0; timeIndex < aggAvailabilities.timesOfDay.length; timeIndex++) {
-    aggAvailabilities.table[0][timeIndex + 1] = aggAvailabilities.timesOfDay[timeIndex]
-  }
+  aggAvailabilities.min = Math.min.apply(Math, flatTable)
+  aggAvailabilities.max = Math.max.apply(Math, flatTable)
   return aggAvailabilities
 }
 
@@ -70,10 +53,9 @@ module.exports = {
     User.find({ isVolunteer: true, hasSchedule: true, [certifiedSubjectQuery]: true }, function (err, users) {
       // defining and resetting variables
       var aggAvailabilities = {}
-      aggAvailabilities.table = Array(8).fill(0).map(() => Array(25).fill(0))
+      aggAvailabilities.table = Array(7).fill(0).map(() => Array(24).fill(0))
       aggAvailabilities.min = null
       aggAvailabilities.max = 0
-      aggAvailabilities.table[0][0] = ''
 
       if (err) {
         return callback(null, err)
@@ -83,7 +65,6 @@ module.exports = {
             aggAvailabilities = aggregateAvailabilities(user.availability, aggAvailabilities)
           }
         })
-        aggAvailabilities = addHeaders(aggAvailabilities)
         aggAvailabilities = findMinAndMax(aggAvailabilities)
         return callback(aggAvailabilities, null)
       }
