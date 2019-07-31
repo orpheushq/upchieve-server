@@ -61,7 +61,8 @@ var iterateKeys = function (update, data, callback) {
     'trigonometry',
     'planning'
   ].forEach(function (key) {
-    if (data.hasOwnProperty(key)) {
+    // must check that data has the key property and that the value of data.key is not undefined
+    if (data.hasOwnProperty(key) && typeof (data[key]) !== 'undefined') {
       if (data[key].hasOwnProperty('passed')) {
         update[key]['passed'] = data[key]['passed']
       }
