@@ -102,7 +102,7 @@ module.exports = {
     var update = {}
 
     // Keys to virtual properties
-    var virtualProps = ['hasCertification', 'phonePretty']
+    var virtualProps = ['hasCertification', 'numberOfHours', 'hasAvailability', 'isVolunteerReady', 'phonePretty', 'isVolunteerApproved']
 
     // if updating a virtual property
     if (virtualProps.some(function (key) { return data[key] })) {
@@ -130,7 +130,6 @@ module.exports = {
         if (err) {
           return callback('No fields defined to update')
         }
-        console.log(update)
         // update the document directly (more efficient, but ignores virtual props)
         User.findByIdAndUpdate(userId, update, { new: true, runValidators: true }, getProfileIfSuccessful(user, callback))
       })
