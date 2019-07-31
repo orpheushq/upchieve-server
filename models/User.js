@@ -375,9 +375,92 @@ var userSchema = new mongoose.Schema({
     default: false
   },
 
-  isVolunteerApproved: {
-    type: Boolean,
-    default: false
+  onboarding: {
+    identityProof: {
+      displayName: {
+        type: String,
+        default: 'Proof of identity'
+      },
+      description: {
+        type: String
+      },
+      submitted: {
+        type: Boolean,
+        default: false
+      },
+      passed: {
+        type: Boolean,
+        default: false
+      }
+    },
+    eduProof: {
+      displayName: {
+        type: String,
+        default: 'Proof of education'
+      },
+      description: {
+        type: String
+      },
+      submitted: {
+        type: Boolean,
+        default: false
+      },
+      passed: {
+        type: Boolean,
+        default: false
+      }
+    },
+    providedRefs: {
+      displayName: {
+        type: String,
+        default: 'Provide at least 2 references'
+      },
+      description: {
+        type: String
+      },
+      submitted: {
+        type: Boolean,
+        default: false
+      },
+      passed: {
+        type: Boolean,
+        default: false
+      }
+    },
+    signedAgreement: {
+      displayName: {
+        type: String,
+        default: 'Sign the legal agreement'
+      },
+      description: {
+        type: String
+      },
+      submitted: {
+        type: Boolean,
+        default: false
+      },
+      passed: {
+        type: Boolean,
+        default: false
+      }
+    },
+    scheduleCall: {
+      displayName: {
+        type: String,
+        default: 'Schedule a call with Mark'
+      },
+      description: {
+        type: String
+      },
+      submitted: {
+        type: Boolean,
+        default: false
+      },
+      passed: {
+        type: Boolean,
+        default: false
+      }
+    }
   },
 
   /* Fake Users
@@ -424,7 +507,7 @@ userSchema.methods.parseProfile = function () {
     nickname: this.nickname,
     picture: this.picture,
     isVolunteer: this.isVolunteer,
-    isVolunteerApproved: this.isVolunteerApproved,
+    onboarding: this.onboarding,
     isAdmin: this.isAdmin,
     referred: this.referred,
     createdAt: this.createdAt,
@@ -467,8 +550,10 @@ userSchema.methods.parseProfile = function () {
     calculus: this.calculus,
 
     phonePretty: this.phonePretty,
+    isVolunteerApproved: this.isVolunteerApproved,
     hasAvailability: this.hasAvailability,
     hasCertification: this.hasCertification,
+    isVolunteerReady: this.isVolunteerReady,
     numberOfHours: this.numberOfHours
   }
 }
@@ -548,6 +633,17 @@ userSchema.virtual('phonePretty')
       var [, area, prefix, line] = v.match(PHONE_REGEX) || []
       this.phone = `${area}${prefix}${line}`
     }
+  })
+
+userSchema.virtual('isVolunteerApproved')
+  .get(function () {
+    var onboarding = Object.values(this.onboarding)
+    for (var i = 0; i < onboarding.length; i++) {
+      if (onboarding[i].passed === false) {
+        return false
+      }
+    }
+    return true
   })
 
 userSchema.virtual('hasAvailability')
