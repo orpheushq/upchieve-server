@@ -382,7 +382,8 @@ var userSchema = new mongoose.Schema({
         default: 'Proof of identity'
       },
       description: {
-        type: String
+        type: String,
+        default: 'Provide a photo id.'
       },
       submitted: {
         type: Boolean,
@@ -399,7 +400,8 @@ var userSchema = new mongoose.Schema({
         default: 'Proof of education'
       },
       description: {
-        type: String
+        type: String,
+        default: 'Provide proof of education.'
       },
       submitted: {
         type: Boolean,
@@ -413,10 +415,11 @@ var userSchema = new mongoose.Schema({
     providedRefs: {
       displayName: {
         type: String,
-        default: 'Provide at least 2 references'
+        default: 'Provide references'
       },
       description: {
-        type: String
+        type: String,
+        default: 'Provide at least 2 references.'
       },
       submitted: {
         type: Boolean,
@@ -433,7 +436,8 @@ var userSchema = new mongoose.Schema({
         default: 'Sign the legal agreement'
       },
       description: {
-        type: String
+        type: String,
+        default: 'View and sign the legal agreement.'
       },
       submitted: {
         type: Boolean,
@@ -447,10 +451,11 @@ var userSchema = new mongoose.Schema({
     scheduleCall: {
       displayName: {
         type: String,
-        default: 'Schedule a call with Mark'
+        default: 'Schedule a call'
       },
       description: {
-        type: String
+        type: String,
+        default: 'Schedule an info call with an UPchieve staff member (Mark).'
       },
       submitted: {
         type: Boolean,
