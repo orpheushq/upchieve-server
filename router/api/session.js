@@ -65,11 +65,17 @@ module.exports = function (router) {
         } else {
           var student = session.student
           var volunteer = session.volunteer
-          // add session to the student and volunteer's information
-          addSession(student._id, session)
-          if (volunteer) {
-            addSession(volunteer._id, session)
+
+          // if student exists, add to their pastSessions
+          if (student) {
+            addSession(student, session)
           }
+
+          // if volunteer exists, add to their pastSessions
+          if (volunteer) {
+            addSession(volunteer, session)
+          }
+
           session.endSession()
           res.json({ sessionId: session._id })
         }
