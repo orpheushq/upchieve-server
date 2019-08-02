@@ -251,6 +251,8 @@ var userSchema = new mongoose.Schema({
   },
 
   timezone: String,
+  pastSessions: [{ type: mongoose.Schema.Types.ObjectId,
+    ref: 'Session' }],
 
   algebra: {
     passed: {
