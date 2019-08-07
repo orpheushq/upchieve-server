@@ -10,10 +10,11 @@ module.exports = function (app) {
   require('./auth')(app)
   require('./api')(app)
   require('./edu')(app)
+  require('./twiml')(app)
 
   // Determine if incoming request is a static asset
   var isStaticReq = function (req) {
-    var whitelist = ['/auth', '/api', '/js', '/css']
+    var whitelist = ['/auth', '/api', '/js', '/css', '/twiml']
     if (config.NODE_ENV === 'dev') {
       whitelist.push('/debug-sentry')
     }

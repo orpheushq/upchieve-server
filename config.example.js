@@ -3,6 +3,7 @@
 module.exports = {
   NODE_ENV: 'dev',
   SSL_CERT_PATH: '',
+  // set host to your public IP address to test Twilio voice calling
   host: process.env.SERVER_HOST || 'localhost:3000',
   database: 'mongodb://localhost:27017/upchieve',
   sessionSecret: process.env.SESSION_SECRET || 'secret',
@@ -28,6 +29,14 @@ module.exports = {
 
   // Sentry Data Source Name
   sentryDsn: '',
+
+  // Failsafe notification options
+  // time until second (desperate) SMS message is sent
+  desperateSMSTimeout: 300000,
+  // time until voice call is made
+  desperateVoiceTimeout: 600000,
+  // voice to use to render speech
+  voice: 'man',
 
   VOLUNTEER_CODES: process.env.UPCHIEVE_VOLUNTEER_CODES || '',
   STUDENT_CODES: process.env.UPCHIEVE_STUDENT_CODES || ''
