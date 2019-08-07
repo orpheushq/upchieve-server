@@ -85,12 +85,7 @@ asdf install mongodb [VERSION]
    2. If you want to track errors on Sentry, set the
    `sentryDsn` property to whichever Sentry database you would like to receive messages.
 4. Run `npm run dev` to start the dev server on `http://localhost:3000`. If you get a [`bcrypt`][bcrypt] compilement error, run `npm rebuild`.
-5. See [the web client repo](https://github.com/UPchieve/web) for client
-   any of these--improvements forthcoming).
-  
-5. Run `npm run dev` to start the dev server on `http://localhost:3000`. If you get a [`bcrypt`][bcrypt] compilement error, run `npm rebuild`.
-6. See [the web client repo](https://github.com/UPchieve/web) for client
-   installation
+5. See [the web client repo](https://github.com/UPchieve/web) for client installation.
 
 [bcrypt]: https://www.npmjs.com/package/bcrypt
 
