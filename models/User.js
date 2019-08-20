@@ -470,6 +470,16 @@ var userSchema = new mongoose.Schema({
     }
   },
 
+  isFailsafeVolunteer: {
+    type: Boolean,
+    default: false,
+    validate: {
+      validator: function (v) {
+        return this.isVolunteer || !v
+      },
+      message: 'A student cannot be a failsafe volunteer'
+    }
+  },
   /* Fake Users
    * These aren't the same as Test Users; they still receive Twilio texts, etc
    * Fake Users are real, fully functional accounts that we decide not to track because they've been
@@ -529,6 +539,7 @@ userSchema.methods.parseProfile = function () {
     phone: this.phone,
     preferredContactMethod: this.preferredContactMethod,
     availability: this.availability,
+    pastSessions: this.pastSessions,
 
     highschool: this.highschool,
     currentGrade: this.currentGrade,
