@@ -2,15 +2,34 @@ var User = require('../models/User')
 var UserCtrl = require('../controllers/UserCtrl')
 
 // helper to check for errors before getting user profile
-function getProfileIfSuccessful (volunteer, callback) {
+function getProfileIfSuccessful (callback) {
   return function (err, volunteer) {
     if (err) {
-      return callback(err)
+      callback(err)
+    } else if (!volunteer) {
+      callback('No volunteer to update')
     } else {
       volunteer.getProfile(callback)
     }
   }
 }
+
+/**
+ * Helper that checks if a non-admin is forbidden to perform
+ * the requested changes
+ * @param {*} data
+ * @param {*} user
+ */
+function isAdminUpdateOnly(data, user) {
+  // for the onboarding subdocuments, only allow non-admins
+  // to change the submitted field
+  return data.onboarding && Object.entries(data.onboarding).some((e) =>
+    Object.entries(e[1]).some(
+      (e2) => e2[0] !== 'submitted' && e2[1] !== user.onboarding[e[0]][e2[0]]
+    )
+  )
+}
+
 /**
  * Helper function that, given a single users's
  * availability, adds when they are free to the
@@ -99,6 +118,7 @@ module.exports = {
   editVolunteer: function (options, callback) {
     var userId = options.userId
     var data = options.data || {}
+    var isAdmin = options.isAdmin
     var update = {}
 
     // Keys to virtual properties
@@ -111,6 +131,11 @@ module.exports = {
         if (err) {
           callback(err)
         } else {
+          if (!isAdmin && isAdminUpdateOnly(data, user)) {
+            // early exit
+            return callback('Non-admins cannot edit onboarding fields other than submitted')
+          }
+
           if (!user) {
             update = new User()
           } else {
@@ -121,7 +146,7 @@ module.exports = {
               return callback(err)
             }
             // save the model that was loaded into memory, processing the virtuals
-            update.save(getProfileIfSuccessful(user, callback))
+            update.save(getProfileIfSuccessful(callback))
           })
         }
       })
@@ -130,8 +155,18 @@ module.exports = {
         if (err) {
           return callback('No fields defined to update')
         }
-        // update the document directly (more efficient, but ignores virtual props)
-        User.findByIdAndUpdate(userId, update, { new: true, runValidators: true }, getProfileIfSuccessful(user, callback))
+
+        User.findById(userId, function (err, user) {
+          if (err) {
+            return callback(err)
+          } else if (!isAdmin && isAdminUpdateOnly(data, user)) {
+            // early exit
+            return callback('Non-admins cannot edit onboarding fields other than submitted')
+          }
+
+          // update the document directly (more efficient, but ignores virtual props)
+          User.findByIdAndUpdate(user._id, update, { new: true, runValidators: true }, getProfileIfSuccessful(callback))
+        })
       })
     }
   },

@@ -21,17 +21,24 @@ module.exports = function (router) {
     })
 
   router.post('/volunteers/:id',
-    passport.isAdmin,
     function (req, res) {
       var data = req.body
+
       VolunteersCtrl.editVolunteer(
         {
           userId: data._id,
-          data: data
+          data: data,
+          isAdmin: req.user.isAdmin
         },
-        function (volunteer, err) {
+        function (err, volunteer) {
           if (err) {
-            res.json({ err: err })
+            res.json({
+              err: err
+            })
+          } else if (!volunteer) {
+            res.json({
+              err: 'No volunteer found with that ID'
+            })
           } else {
             res.json({
               volunteer: volunteer
