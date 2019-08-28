@@ -10,6 +10,7 @@ var ResetPasswordCtrl = require('../../controllers/ResetPasswordCtrl')
 
 var config = require('../../config.js')
 var User = require('../../models/User.js')
+var School = require('../../models/School.js')
 
 var errors = require('../../errors')
 
@@ -122,7 +123,7 @@ module.exports = function (app) {
 
     var code = req.body.code
 
-    var highSchool = req.body.highSchool
+    var highSchoolUpchieveId = req.body.highSchoolId
 
     var college = req.body.college
 
@@ -150,79 +151,106 @@ module.exports = function (app) {
       next(errors.generateError(errors.ERR_INVALID_DATA, checkResult))
     }
 
-    var user = new User()
-    user.email = email
-    user.isVolunteer = !(code === undefined)
-    user.registrationCode = code
-    user.highschool = highSchool
-    user.college = college
-    user.phonePretty = phone
-    user.favoriteAcademicSubject = favoriteAcademicSubject
-    user.firstname = firstName
-    user.lastname = lastName
-    user.verified = code === undefined
+    // Look up high school
+    const promise = new Promise((resolve, reject) => {
+      if (!(code === undefined)) {
+        // don't look up high schools for volunteers
+        resolve({
+          isVolunteer: true
+        })
 
-    user.hashPassword(password, function (err, hash) {
-      user.password = hash // Note the salt is embedded in the final hash
-
-      if (err) {
-        next(err)
+        // early exit
         return
       }
 
-      user.save(function (err) {
+      School.findByUpchieveId(highSchoolUpchieveId, (err, school) => {
+        if (err) {
+          reject(err)
+        } else if (!school.isApproved) {
+          reject(new Error(`School ${highSchoolUpchieveId} is not approved`))
+        } else {
+          resolve({
+            isVolunteer: false,
+            school
+          })
+        }
+      })
+    })
+
+    promise.then(({ isVolunteer, school }) => {
+      const user = new User()
+      user.email = email
+      user.isVolunteer = isVolunteer
+      user.registrationCode = code
+      user.approvedHighschool = school
+      user.college = college
+      user.phonePretty = phone
+      user.favoriteAcademicSubject = favoriteAcademicSubject
+      user.firstname = firstName
+      user.lastname = lastName
+      user.verified = code === undefined
+
+      user.hashPassword(password, function (err, hash) {
+        user.password = hash // Note the salt is embedded in the final hash
+
         if (err) {
           next(err)
-        } else {
-          req.login(user, function (err) {
-            if (err) {
-              console.log(err)
-              next(err)
-            } else {
-              if (user.isVolunteer) {
-                VerificationCtrl.initiateVerification(
-                  {
-                    userId: user._id,
-                    email: user.email
-                  },
-                  function (err, email) {
-                    var msg
-                    if (err) {
-                      msg =
-                        'Registration successful. Error sending verification email: ' +
-                        err
-                      sentry.captureException(err)
-                    } else {
-                      msg =
-                        'Registration successful. Verification email sent to ' +
-                        email
-                    }
+          return
+        }
 
-                    req.login(user, function (err) {
-                      if (err) {
-                        res.json({
-                          msg: msg,
-                          err: err
-                        })
-                      } else {
-                        res.json({
-                          msg: msg,
-                          user: user
-                        })
-                      }
-                    })
-                  }
-                )
+        user.save(function (err) {
+          if (err) {
+            next(err)
+          } else {
+            req.login(user, function (err) {
+              if (err) {
+                console.log(err)
+                next(err)
               } else {
-                res.json({
-                  // msg: msg,
-                  user: user
-                })
+                if (user.isVolunteer) {
+                  VerificationCtrl.initiateVerification(
+                    {
+                      userId: user._id,
+                      email: user.email
+                    },
+                    function (err, email) {
+                      var msg
+                      if (err) {
+                        msg =
+                          'Registration successful. Error sending verification email: ' +
+                          err
+                        sentry.captureException(err)
+                      } else {
+                        msg =
+                          'Registration successful. Verification email sent to ' +
+                          email
+                      }
+
+                      req.login(user, function (err) {
+                        if (err) {
+                          next(err)
+                        } else {
+                          res.json({
+                            msg: msg,
+                            user: user
+                          })
+                        }
+                      })
+                    }
+                  )
+                } else {
+                  res.json({
+                    // msg: msg,
+                    user: user
+                  })
+                }
               }
             }
           })
         }
       })
+    }).catch((err) => {
+      next(err)
     })
   })
 

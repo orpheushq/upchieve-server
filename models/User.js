@@ -45,7 +45,12 @@ var userSchema = new mongoose.Schema({
     match: [ /^[0-9]{10}$/, '{VALUE} is not a phone number in the format ##########' ],
     required: [function () { return this.isVolunteer }, 'Phone number is required.']
   },
-  highschool: { type: String, required: [function () { return !this.isVolunteer }, 'High school is required.'] },
+  approvedHighschool: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'School'
+    /* TODO validate approvedHighschool.isApproved: true
+     * if this.isVolunteer is false */
+  },
   currentGrade: String,
   expectedGraduation: String,
   difficultAcademicSubject: String,
@@ -452,7 +457,7 @@ userSchema.methods.parseProfile = function () {
     hasSchedule: this.hasSchedule,
     pastSessions: this.pastSessions,
 
-    highschool: this.highschool,
+    highschoolName: this.highschoolName,
     currentGrade: this.currentGrade,
     expectedGraduation: this.expectedGraduation,
     difficultAcademicSubject: this.difficultAcademicSubject,
@@ -556,6 +561,15 @@ userSchema.virtual('phonePretty')
       // and destructure the remaining portion
       var [, area, prefix, line] = v.match(PHONE_REGEX) || []
       this.phone = `${area}${prefix}${line}`
+    }
+  })
+
+userSchema.virtual('highschoolName')
+  .get(function () {
+    if (this.approvedHighschool) {
+      return this.approvedHighschool.name
+    } else {
+      return null
     }
   })
 
