@@ -226,9 +226,8 @@ module.exports = {
               voice: options && options.voice,
               isTestUserRequest: options && options.isTestUserRequest
             })
-        })
-        .catch(function (err) {
-        	sentry.captureException(err)
+        }).catch(function (err) {
+          sentry.captureException(err)
         })
       })
   }
