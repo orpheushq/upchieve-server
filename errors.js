@@ -67,6 +67,13 @@ module.exports = {
     err._uid = uid()
     return err
   },
+  
+  // augment error with needed information
+  augmentError: function (err) {
+    err.statusCode = this.statusFor(err)
+    err._uid = uid()
+    return err
+  },
 
   statusFor: function (err) {
     return Object.entries(err).map(function (e1) {
@@ -92,5 +99,10 @@ module.exports = {
   ERR_INVALID_DATA: 'EBADDATA',
   ERR_NOT_AUTHORIZED: 'EFORBID',
 
-  dontReport
+  dontReport,
+  
+  shouldReport: function (err) {
+    return !this.dontReport.some(e => err.name === e || err.code === e) &&
+      err.statusCode !== 422
+  }
 }

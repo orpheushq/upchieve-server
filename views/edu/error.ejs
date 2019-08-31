@@ -1,0 +1,15 @@
+<%# Error page that includes scripts for displaying the Sentry error feedback form %>
+<h1><%= statusMessage %></h1>
+<pre>
+<%= error %>
+</pre>
+<%- contentFor('title') %>
+<%= statusMessage %>
+<%- contentFor('scripts') %>
+<script src="https://browser.sentry-cdn.com/5.6.3/bundle.min.js" integrity="sha384-/Cqa/8kaWn7emdqIBLk3AkFMAHBk0LObErtMhO+hr52CntkaurEnihPmqYj3uJho" crossorigin="anonymous"></script>
+<script>
+Sentry.init({ dsn: '<%= sentryDsn %>' })
+document.body.onload = function () {
+  Sentry.showReportDialog({ eventId: '<%= sentryEventId %>' })
+}
+</script>

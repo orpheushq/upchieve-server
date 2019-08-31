@@ -6,6 +6,8 @@ const passport = require('../auth/passport')
 const QuestionCtrl = require('../../controllers/QuestionCtrl')
 const { questionsPath, isActivePage } = require('./helpers')
 
+const errors = require('../../errors')
+
 console.log('Edu Admin module')
 
 const edu = express()
@@ -17,7 +19,7 @@ edu.locals = {
 }
 
 // GET /edu
-edu.get('/', async (req, res) => {
+edu.get('/', async (req, res, next) => {
   try {
     const categories = (await QuestionCtrl.categories()).reduce(
       (acc, [category, subcategories]) => [
@@ -36,18 +38,18 @@ edu.get('/', async (req, res) => {
       isActive: isActivePage(req)
     })
   } catch (error) {
-    res.status(500).send(`<h1>Internal Server Error</h1> <pre>${error}</pre>`)
+    next(errors.augmentError(error))
   }
 })
 
 // GET /edu/questions
-edu.route('/questions').get(async (req, res) => {
+edu.route('/questions').get(async (req, res, next) => {
   try {
     const questions = await QuestionCtrl.list(req.query || {})
     const isActive = isActivePage(req)
     res.render('edu/questions/index', { questions, isActive })
   } catch (error) {
-    res.status(500).send(`<h1>Internal Server Error</h1> <pre>${error}</pre>`)
+    next(errors.augmentError(error))
   }
 })
 
@@ -63,17 +65,19 @@ edu.route('/questions/new').get((req, res) => {
 const eduApi = express()
 
 // POST[JSON] /edu/questions
-eduApi.post('/questions', async (req, res) => {
+eduApi.post('/questions', async (req, res, next) => {
   try {
     const question = await QuestionCtrl.create(req.body.question)
     res.status(200).json({ question: question })
   } catch (error) {
-    res.status(422).json({ error })
+    error.statusCode = 422
+    error.isApi = true
+    next(error)
   }
 })
 
 // PUT[JSON] /edu/questions/:id
-eduApi.put('/questions/:id', async (req, res) => {
+eduApi.put('/questions/:id', async (req, res, next) => {
   try {
     const updatedQuestion = await QuestionCtrl.update({
       id: req.params.id,
@@ -81,17 +85,21 @@ eduApi.put('/questions/:id', async (req, res) => {
     })
     res.status(200).json({ question: updatedQuestion })
   } catch (error) {
-    res.status(422).json({ error })
+    error.statusCode = 422
+    error.isApi = true
+    next(error)
   }
 })
 
 // DELETE[JSON] /edu/questions/:id
-eduApi.delete('/questions/:id', async (req, res) => {
+eduApi.delete('/questions/:id', async (req, res, next) => {
   try {
     const question = await QuestionCtrl.destroy(req.params.id)
     res.status(200).json({ question: question })
   } catch (error) {
-    res.status(422).json({ error })
+    error.statusCode = 422
+    error.isApi = true
+    next(error)
   }
 })
 
