@@ -16,9 +16,6 @@ var config = require('./config')
 
 var errors = require('./errors')
 
-// to render error page properly for EDU admin
-const eduHelpers = require('./router/edu/helpers')
-
 // Database
 mongoose.connect(config.database, { useNewUrlParser: true })
 var db = mongoose.connection
@@ -155,7 +152,7 @@ app.use('/edu', function (err, req, res, next) {
         layout: 'layouts/edu',
         error: e,
         homeLink: config.NODE_ENV === 'dev' ? 'http://localhost:8080' : '/',
-        isActive: eduHelpers.isActivePage(rq),
+        isActive: navUrl => false,
         statusMessage: 'Internal Server Error',
         sentryDsn: config.sentryDsn,
         sentryEventId: sentryEvent ? sentryEvent.eventId : undefined
