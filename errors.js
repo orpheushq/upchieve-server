@@ -68,7 +68,7 @@ module.exports = {
     return err
   },
   
-  // augment exiting error object with needed information for proper reporting
+  // augment existing error object with needed information for proper reporting
   augmentError: function (err) {
     err.statusCode = this.statusFor(err)
     err._uid = uid()
