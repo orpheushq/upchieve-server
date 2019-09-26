@@ -457,7 +457,7 @@ module.exports = {
     }, function (err, session) {
       if (err) {
         cb(err)
-      } else if (!user) {
+      } else if (!user || !user._id) {
         cb('This action requires a user ID')
       } else if (self.isNotSessionParticipant(session, user)) {
         cb('Only session participants can perform this action')
