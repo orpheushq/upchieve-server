@@ -132,16 +132,6 @@ module.exports = function (app) {
     // Whiteboard interaction
     // all of this is now blocked for non-participants
 
-    socket.on('canvasLoaded', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        socket.broadcast.to(data.sessionId).emit('size', {
-          height: data.height
-        })
-      })
-    })
-
     socket.on('drawClick', function (data) {
       if (!data || !data.sessionId) return
       SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
@@ -244,25 +234,6 @@ module.exports = function (app) {
           y: data.y,
           color: data.color
         })
-      })
-    })
-
-    socket.on('insertText', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        io.to(data.sessionId).emit('text', {
-          text: data.text,
-          x: data.x,
-          y: data.y
-        })
-      })
-    })
-
-    socket.on('resetScreen', function (data) {
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        io.to(data.sessionId).emit('reset')
       })
     })
   })
