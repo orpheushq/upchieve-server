@@ -144,7 +144,7 @@ module.exports = function (app) {
       if (!data || !data.sessionId) return
       SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err, session) {
         if (err) return
-        session.saveWhiteboardUrl('')
+        session.saveWhiteboardUrl(data.whiteboardUrl)
         socket.broadcast.to(data.sessionId).emit('undo')
       })
     })
