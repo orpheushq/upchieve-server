@@ -132,28 +132,6 @@ module.exports = function (app) {
     // Whiteboard interaction
     // all of this is now blocked for non-participants
 
-    socket.on('canvasLoaded', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        socket.broadcast.to(data.sessionId).emit('size', {
-          height: data.height
-        })
-      })
-    })
-
-    socket.on('drawClick', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        socket.broadcast.to(data.sessionId).emit('draw', {
-          x: data.x,
-          y: data.y,
-          type: data.type
-        })
-      })
-    })
-
     socket.on('saveImage', function (data) {
       if (!data || !data.sessionId) return
       SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
@@ -164,50 +142,19 @@ module.exports = function (app) {
 
     socket.on('undoClick', function (data) {
       if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
+      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err, session) {
         if (err) return
+        session.saveWhiteboardUrl('')
         socket.broadcast.to(data.sessionId).emit('undo')
       })
     })
 
     socket.on('clearClick', function (data) {
       if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        io.to(data.sessionId).emit('clear')
-      })
-    })
-
-    socket.on('drawing', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        socket.broadcast.to(data.sessionId).emit('draw')
-      })
-    })
-
-    socket.on('end', function (data) {
-      if (!data || !data.sessionId) return
       SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err, session) {
         if (err) return
-        session.saveWhiteboardUrl(data.whiteboardUrl)
-        socket.broadcast.to(data.sessionId).emit('end', data)
-      })
-    })
-
-    socket.on('changeColor', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        socket.broadcast.to(data.sessionId).emit('color', data.color)
-      })
-    })
-
-    socket.on('changeWidth', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        socket.broadcast.to(data.sessionId).emit('width', data.width)
+        session.saveWhiteboardUrl('')
+        io.to(data.sessionId).emit('clear')
       })
     })
 
@@ -218,7 +165,8 @@ module.exports = function (app) {
         socket.broadcast.to(data.sessionId).emit('dstart', {
           x: data.x,
           y: data.y,
-          color: data.color
+          color: data.color,
+          width: data.width
         })
       })
     })
@@ -230,31 +178,22 @@ module.exports = function (app) {
         socket.broadcast.to(data.sessionId).emit('drag', {
           x: data.x,
           y: data.y,
-          color: data.color
+          color: data.color,
+          width: data.width
         })
       })
     })
 
     socket.on('dragEnd', function (data) {
       if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
+      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err, session) {
         if (err) return
+        session.saveWhiteboardUrl(data.whiteboardUrl)
         socket.broadcast.to(data.sessionId).emit('dend', {
           x: data.x,
           y: data.y,
-          color: data.color
-        })
-      })
-    })
-
-    socket.on('insertText', function (data) {
-      if (!data || !data.sessionId) return
-      SessionCtrl.verifySessionParticipantBySessionId(data.sessionId, data.user, function (err) {
-        if (err) return
-        io.to(data.sessionId).emit('text', {
-          text: data.text,
-          x: data.x,
-          y: data.y
+          color: data.color,
+          width: data.width
         })
       })
     })
