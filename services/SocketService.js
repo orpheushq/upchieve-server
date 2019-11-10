@@ -54,6 +54,8 @@ module.exports = function (io) {
     },
     
     emitSessionEnd: async function (sessionId) {
+      const session = await Session.findById(sessionId)
+      io.in(sessionId).emit("session-change", session)
       io.in("volunteers").emit("session-end", sessionId)
       await this.updateSessionList()
     },
