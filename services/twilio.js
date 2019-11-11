@@ -4,6 +4,7 @@ var twilio = require('twilio')
 var moment = require('moment-timezone')
 const async = require('async')
 const client = twilio(config.accountSid, config.authToken)
+const base64url = require('base64url')
 
 const Session = require('../models/Session')
 const Notification = require('../models/Notification')
@@ -48,39 +49,40 @@ function getAvailability () {
   return `availability.${days[day]}.${hour}`
 }
 
-var getAvailableVolunteersFromDb = function (subtopic, options) {
+// return query filter object limiting notifications to the available volunteers
+function filterAvailableVolunteers (subtopic, options) {
   var availability = getAvailability()
   console.log(availability)
 
-  var certificationPassed = subtopic + '.passed'
+  var certificationPassed = `certifications.${subtopic}.passed`
 
   // Only notify admins about requests from test users (for manual testing)
   var shouldOnlyGetAdmins = options.isTestUserRequest || false
-
-  // True if the query should include failsafe users
-  var shouldGetFailsafe = options.shouldGetFailsafe
 
   var userQuery = {
     isVolunteer: true,
     [certificationPassed]: true,
     [availability]: true,
     isTestUser: false,
-    isFakeUser: false
+    isFakeUser: false,
+    isFailsafeVolunteer: false
   }
 
   if (shouldOnlyGetAdmins) {
     userQuery.isAdmin = true
   }
 
-  if (!shouldGetFailsafe) {
-    userQuery.isFailsafeVolunteer = false
-  }
+  return userQuery
+}
 
-  const query = User.aggregate([
-    { $match: userQuery },
-    { $project: { phone: 1, firstname: 1 } },
-    { $sample: { size: 5 } }
-  ])
+// get next wave of non-failsafe volunteers to notify
+var getNextVolunteersFromDb = function (subtopic, notifiedUserIds, userIdsInSessions, options) {
+  const userQuery = filterAvailableVolunteers(subtopic, options)
+
+  userQuery._id = { $nin: notifiedUserIds.concat(userIdsInSessions) }
+
+  const query = User.find(userQuery)
+    .populate('volunteerLastNotification volunteerLastSession')
 
   return query
 }
@@ -98,9 +100,14 @@ function sendTextMessage (phoneNumber, messageText, isTestUserRequest) {
 
   const testUserNotice = isTestUserRequest ? '[TEST USER] ' : ''
 
+  // If stored phone number doesn't have international calling code (E.164 formatting)
+  // then default to US number
+  // @todo: normalize previously stored US phone numbers
+  const fullPhoneNumber = phoneNumber[0] === '+' ? phoneNumber : `+1${phoneNumber}`
+
   return client.messages
     .create({
-      to: `+1${phoneNumber}`,
+      to: fullPhoneNumber,
       from: config.sendingNumber,
       body: testUserNotice + messageText
     })
@@ -125,12 +132,17 @@ function sendVoiceMessage (phoneNumber, messageText) {
   // URL for Twilio to retrieve the TwiML with the message text and voice
   const url = apiRoot + '/message/' + encodeURIComponent(messageText)
 
+  // If stored phone number doesn't have international calling code (E.164 formatting)
+  // then default to US number
+  // @todo: normalize previously stored US phone numbers
+  const fullPhoneNumber = phoneNumber[0] === '+' ? phoneNumber : `+1${phoneNumber}`
+
   // initiate call, giving Twilio the aforementioned URL which Twilio
   // opens when the call is answered to get the TwiML instructions
   return client.calls
     .create({
       url: url,
-      to: `+1${phoneNumber}`,
+      to: fullPhoneNumber,
       from: config.sendingNumber
     })
     .then((call) => {
@@ -139,8 +151,16 @@ function sendVoiceMessage (phoneNumber, messageText) {
     })
 }
 
-function send (phoneNumber, name, subtopic, isTestUserRequest) {
-  var messageText = `Hi ${name}, a student just requested help in ${subtopic} at app.upchieve.org. Please log in now to help them if you can!`
+// the URL that the volunteer can use to join the session on the client
+function getSessionUrl (sessionId) {
+  const protocol = (config.NODE_ENV === 'production' ? 'https' : 'http')
+  const sessionIdEncoded = base64url(Buffer.from(sessionId.toString(), 'hex'))
+  return `${protocol}://${config.client.host}/s/${sessionIdEncoded}`
+}
+
+function send (phoneNumber, name, subtopic, isTestUserRequest, sessionId) {
+  const sessionUrl = getSessionUrl(sessionId)
+  const messageText = `Hi ${name}, a student needs help in ${subtopic} on UPchieve! Click here to start helping them now: ${sessionUrl}`
 
   return sendTextMessage(phoneNumber, messageText, isTestUserRequest)
 }
@@ -171,6 +191,8 @@ function sendFailsafe (phoneNumber, name, options) {
   const numberOfVolunteersNotifiedMessage = `${numOfRegularVolunteersNotified} ` +
     `regular volunteer${numOfRegularVolunteersNotified === 1 ? ' has' : 's have'} been notified.`
 
+  const sessionUrl = getSessionUrl(options.sessionId)
+
   let messageText
   if (desperate) {
     messageText = `Hi ${name}, student ${studentFirstname} ${studentLastname} ` +
@@ -188,6 +210,7 @@ function sendFailsafe (phoneNumber, name, options) {
   if (voice) {
     return sendVoiceMessage(phoneNumber, messageText)
   } else {
+    messageText = messageText + ` ${sessionUrl}`
     return sendTextMessage(phoneNumber, messageText, isTestUserRequest)
   }
 }
@@ -218,65 +241,122 @@ function recordNotification (sendPromise, notification) {
 }
 
 module.exports = {
-  // notify both standard and failsafe volunteers
-  notify: function (student, type, subtopic, options, cb) {
-    var isTestUserRequest = options.isTestUserRequest || false
-    const session = options.session
+  // get total number of available, non-failsafe volunteers in the database
+  // return Promise that resolves to count
+  countAvailableVolunteersInDb: function (subtopic, options) {
+    return User.countDocuments(filterAvailableVolunteers(subtopic, options)).exec()
+  },
 
-    // standard notifications for non-failsafe volunteers
-    getAvailableVolunteersFromDb(subtopic, {
-      isTestUserRequest,
-      shouldGetFailsafe: false
-    })
-      .exec((err, persons) => {
-        if (err) {
-          console.log(err)
-          // early exit
-          return
-        }
-
-        console.log(persons.map(person => person._id))
-        // notifications to record in the Session instance
-        const notifications = []
-
-        async.each(persons, (person, cb) => {
-          // record notification in database
-          const notification = new Notification({
-            volunteer: person,
-            method: 'SMS'
-          })
-
-          const sendPromise = send(person.phone, person.firstname, subtopic, isTestUserRequest)
-          // wait for recordNotification to succeed or fail before callback,
-          // and don't break loop if only one message fails
-          recordNotification(sendPromise, notification)
-            .then(notification => notifications.push(notification))
-            .catch(err => console.log(err))
-            .finally(cb)
-        },
-        (err) => {
-          if (err) {
-            console.log(err)
-          }
-
-          // save notifications to Session instance
-          session.addNotifications(notifications)
-            // retrieve the updated session document
-            .then(() => Session.findById(session._id))
-            .then((modifiedSession) => {
-              options.session = modifiedSession
-
-              // failsafe notifications
-              this.notifyFailsafe(student, type, subtopic, options)
-
-              if (cb) {
-                cb(modifiedSession)
-              }
-            })
-            .catch(err => console.log(err))
-        })
+  // count the number of regular volunteers that have been notified for a session
+  // return Promise that resolves to count
+  countVolunteersNotified: function (session) {
+    return Session.findById(session._id)
+      .populate('notifications')
+      .exec()
+      .then((populatedSession) => {
+        return populatedSession.notifications
+          .map((notification) => notification.volunteer)
+          .filter(
+            (volunteer, index, array) =>
+              array.indexOf(volunteer) === index &&
+             !volunteer.isFailsafeVolunteer
+          )
+          .length
       })
   },
+
+  // notify both standard and failsafe volunteers
+  notify: function (student, type, subtopic, options, cb) {
+    const session = options.session
+
+    // send first wave of notifications to non-failsafe volunteers
+    this.notifyWave(student, type, subtopic, session, options, (modifiedSession) => {
+      // send failsafe notifications
+      options.session = modifiedSession
+      this.notifyFailsafe(student, type, subtopic, options)
+      cb(modifiedSession)
+    })
+  },
+
+  // notify the next wave of volunteers, selected from those that have
+  // not already been notified of the session
+  // optionally executes a callback passing the updated session document after notifications are sent,
+  // and the number of volunteers notified in this wave
+  notifyWave: function (student, type, subtopic, session, options, cb) {
+    Promise.all([
+      // find previously sent notifications for the session
+      Session.findById(session._id).populate('notifications').exec(),
+      // find active sessions
+      Session.find({ endedAt: { $exists: false } }).exec()
+    ])
+      .then(([populatedSession, activeSessions]) => {
+        // previously notified volunteers
+        const notifiedUsers = populatedSession.notifications.map((notification) => notification.volunteer)
+
+        // volunteers in active sessions
+        const userIdsInSessions = activeSessions
+          .filter((activeSession) => !!activeSession.volunteer)
+          .map((activeSession) => activeSession.volunteer)
+
+        const isTestUserRequest = options.isTestUserRequest
+
+        // notify the next wave of volunteers that haven't already been notified
+        getNextVolunteersFromDb(subtopic, notifiedUsers, userIdsInSessions, {
+          isTestUserRequest
+        })
+          .exec((err, persons) => {
+            if (err) {
+              // early exit
+              console.log(err)
+              return
+            }
+
+            const volunteersByPriority = persons
+              .filter(v => v.volunteerPointRank >= 0)
+              .sort((v1, v2) => v2.volunteerPointRank - v1.volunteerPointRank)
+
+            const volunteersToNotify = volunteersByPriority.slice(0, 5)
+
+            // notifications to record in the database
+            const notifications = []
+
+            async.each(volunteersToNotify, (person, cb) => {
+              // record notification in database
+              const notification = new Notification({
+                volunteer: person,
+                type: 'REGULAR',
+                method: 'SMS'
+              })
+
+              const sendPromise = send(person.phone, person.firstname, subtopic, isTestUserRequest, session._id)
+              // wait for recordNotification to succeed or fail before callback,
+              // and don't break loop if only one message fails
+              recordNotification(sendPromise, notification)
+                .then(notification => notifications.push(notification))
+                .catch(err => console.log(err))
+                .finally(cb)
+            },
+            (err) => {
+              if (err) {
+                console.log(err)
+              }
+
+              // save notifications to Session instance
+              session.addNotifications(notifications)
+                // retrieve the updated session document to pass to callback
+                .then(() => Session.findById(session._id))
+                .then((modifiedSession) => {
+                  if (cb) {
+                    cb(modifiedSession, notifications.length)
+                  }
+                })
+                .catch(err => console.log(err))
+            })
+          })
+      })
+      .catch((err) => console.log(err))
+  },
+
   // notify failsafe volunteers
   notifyFailsafe: function (student, type, subtopic, options) {
     const session = options && options.session
@@ -325,7 +405,8 @@ module.exports = {
               desperate: options && options.desperate,
               voice: options && options.voice,
               isTestUserRequest: options && options.isTestUserRequest,
-              numOfRegularVolunteersNotified: numOfRegularVolunteersNotified
+              numOfRegularVolunteersNotified: numOfRegularVolunteersNotified,
+              sessionId: session._id
             })
           // wait for recordNotification to succeed or fail before callback,
           // and don't break loop if only one message fails
