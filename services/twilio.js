@@ -65,20 +65,16 @@ function filterAvailableVolunteers (subtopic, options) {
 
   var certificationPassed = `certifications.${subtopic}.passed`
 
-  // Only notify admins about requests from test users (for manual testing)
-  var shouldOnlyGetAdmins = options.isTestUserRequest || false
+  // Only notify volunteer test users about requests from student test users (for manual testing)
+  var shouldOnlyGetTestUsers = options.isTestUserRequest || false
 
   var userQuery = {
     isVolunteer: true,
     [certificationPassed]: true,
     [availability]: true,
-    isTestUser: false,
+    isTestUser: shouldOnlyGetTestUsers,
     isFakeUser: false,
     isFailsafeVolunteer: false
-  }
-
-  if (shouldOnlyGetAdmins) {
-    userQuery.isAdmin = true
   }
 
   return userQuery
@@ -192,7 +188,7 @@ const notifyRegular = async function (session) {
     isTestUserRequest: populatedSession.student.isTestUser
   })
   .exec()
-    
+
   // people to whom to send notifications to
   const volunteersByPriority = waveVolunteers
               .filter(v => v.volunteerPointRank >= 0)
