@@ -10,7 +10,7 @@ module.exports = function (router, io) {
   // io is now passed to this module so that API events can trigger socket events as needed
   const socketService = SocketService(io)
   const sessionCtrl = SessionCtrl(socketService)
-  
+
   router.route('/session/new').post(async function (req, res) {
     var data = req.body || {}
     var sessionType = data.sessionType
@@ -34,7 +34,7 @@ module.exports = function (router, io) {
     var data = req.body || {}
     var sessionId = data.sessionId
     var user = req.user
-    
+
     try {
       const session = await sessionCtrl.end(
         {
@@ -54,7 +54,7 @@ module.exports = function (router, io) {
 
     try {
       const session = await Session.findById(sessionId).exec()
-      
+
       if (!session) {
         res.json({
           err: 'No session found'

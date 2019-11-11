@@ -5,7 +5,6 @@
 const passportSocketIo = require('passport.socketio')
 const cookieParser = require('cookie-parser')
 
-const User = require('../../models/User.js')
 const Session = require('../../models/Session.js')
 
 const config = require('../../config.js')
@@ -17,7 +16,7 @@ const SocketService = require('../../services/SocketService.js')
 module.exports = function (io, sessionStore) {
   const socketService = SocketService(io)
   const sessionCtrl = SessionCtrl(socketService)
-  
+
   // Authentication for sockets
   io.use(passportSocketIo.authorize({
     cookieParser: cookieParser,
@@ -25,17 +24,17 @@ module.exports = function (io, sessionStore) {
     secret: config.sessionSecret,
     store: sessionStore
   }))
-  
+
   io.on('connection', async function (socket) {
     // store user and socket in SocketService
     const connectPromise = socketService.connectUser(socket.request.user._id, socket)
-    
+
     // Session management
     socket.on('join', async function (data) {
       if (!data || !data.sessionId) {
         return
       }
-      
+
       // wait for socketService.connectUser to complete before joining
       await connectPromise.then(() => {
         sessionCtrl.join(
@@ -82,15 +81,15 @@ module.exports = function (io, sessionStore) {
     // Whiteboard interaction
     // all of this is now blocked for non-participants
     const whiteboardAccessError = new Error('Only session participants can access whiteboard')
-    
+
     socket.on('canvasLoaded', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('size', {
         height: data.height
       })
@@ -98,12 +97,12 @@ module.exports = function (io, sessionStore) {
 
     socket.on('drawClick', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-          
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('draw', {
         x: data.x,
         y: data.y,
@@ -113,92 +112,92 @@ module.exports = function (io, sessionStore) {
 
     socket.on('saveImage', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-          
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('save')
     })
 
     socket.on('undoClick', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-          
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('undo')
     })
 
     socket.on('clearClick', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-          
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       io.to(data.sessionId).emit('clear')
     })
 
     socket.on('drawing', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('draw')
     })
 
     socket.on('end', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       const session = await Session.findById(data.sessionId)
-      
+
       sessionCtrl.verifySessionParticipant(
-          session,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        session,
+        socket.request.user,
+        whiteboardAccessError)
+
       session.saveWhiteboardUrl(data.whiteboardUrl)
       socket.broadcast.to(data.sessionId).emit('end', data)
     })
 
     socket.on('changeColor', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('color', data.color)
     })
 
     socket.on('changeWidth', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('width', data.width)
     })
 
     socket.on('dragStart', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('dstart', {
         x: data.x,
         y: data.y,
@@ -208,12 +207,12 @@ module.exports = function (io, sessionStore) {
 
     socket.on('dragAction', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('drag', {
         x: data.x,
         y: data.y,
@@ -223,12 +222,12 @@ module.exports = function (io, sessionStore) {
 
     socket.on('dragEnd', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       socket.broadcast.to(data.sessionId).emit('dend', {
         x: data.x,
         y: data.y,
@@ -238,12 +237,12 @@ module.exports = function (io, sessionStore) {
 
     socket.on('insertText', async function (data) {
       if (!data || !data.sessionId) return
-      
+
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       io.to(data.sessionId).emit('text', {
         text: data.text,
         x: data.x,
@@ -253,10 +252,10 @@ module.exports = function (io, sessionStore) {
 
     socket.on('resetScreen', async function (data) {
       await sessionCtrl.verifySessionParticipantBySessionId(
-          data.sessionId,
-          socket.request.user,
-          whiteboardAccessError)
-      
+        data.sessionId,
+        socket.request.user,
+        whiteboardAccessError)
+
       io.to(data.sessionId).emit('reset')
     })
   })

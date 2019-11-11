@@ -74,10 +74,10 @@ sessionSchema.methods.saveMessage = function (messageObj, cb) {
       })
 
       var savedMessage = session.messages[savedMessageIndex]
-      
+
       return savedMessage
     })
-  
+
   if (cb) {
     promise.then(cb)
   } else {
@@ -118,7 +118,7 @@ sessionSchema.methods.joinUser = async function (user) {
     this.student = user
   }
 
-  return await this.save()
+  return this.save()
 }
 
 sessionSchema.methods.leaveUser = function (user, cb) {
@@ -182,6 +182,6 @@ sessionSchema.statics.getUnfulfilledSessions = function (cb) {
     .populate('student')
     .sort({ createdAt: -1 })
     .exec(cb)
-},
+}
 
 module.exports = mongoose.model('Session', sessionSchema)

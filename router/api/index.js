@@ -5,7 +5,7 @@ module.exports = function (app, sessionStore) {
   console.log('API module')
 
   const io = require('./socket-server')(app)
-  
+
   const router = new express.Router()
   require('./volunteers')(router)
   require('./user')(router)

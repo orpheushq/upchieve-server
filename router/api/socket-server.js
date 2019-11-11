@@ -27,11 +27,11 @@ const createServer = app => {
 
 module.exports = function (app) {
   const server = createServer(app)
-  
+
   const port = config.socketsPort
   server.listen(port)
 
   console.log('Sockets.io listening on port ' + port)
-  
+
   return socket(server)
 }

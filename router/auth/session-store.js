@@ -9,7 +9,7 @@ module.exports = function (app) {
     autoReconnect: true,
     collection: 'auth-sessions'
   })
-  
+
   app.use(
     session({
       resave: true,
@@ -21,6 +21,6 @@ module.exports = function (app) {
       }
     })
   )
-  
+
   return sessionStore
 }

@@ -2,7 +2,6 @@ var config = require('../config.js')
 var User = require('../models/User')
 var twilio = require('twilio')
 var moment = require('moment-timezone')
-const async = require('async')
 const client = twilio(config.accountSid, config.authToken)
 const base64url = require('base64url')
 
@@ -166,39 +165,39 @@ function getSessionUrl (sessionId) {
 
 const notifyRegular = async function (session) {
   const populatedSession = await Session.findById(session._id).populate('student notifications').exec()
-  
+
   const subtopic = session.subTopic
-  
+
   // previously sent notifications for this session
   const notificationsSent = populatedSession.notifications
-  
+
   // currently active sessions
   const activeSessions = await Session.find({ endedAt: { $exists: false } }).exec()
-  
+
   // previously notified volunteers for this session
   const notifiedUserIds = notificationsSent.map((notification) => notification.volunteer)
-  
+
   // volunteers in active sessions
   const userIdsInSessions = activeSessions
     .filter((activeSession) => !!activeSession.volunteer)
     .map((activeSession) => activeSession.volunteer)
-    
+
   // query the database for the next wave
   const waveVolunteers = await getNextVolunteersFromDb(subtopic, notifiedUserIds, userIdsInSessions, {
     isTestUserRequest: populatedSession.student.isTestUser
   })
-  .exec()
+    .exec()
 
   // people to whom to send notifications to
   const volunteersByPriority = waveVolunteers
-              .filter(v => v.volunteerPointRank >= 0)
-              .sort((v1, v2) => v2.volunteerPointRank - v1.volunteerPointRank)
+    .filter(v => v.volunteerPointRank >= 0)
+    .sort((v1, v2) => v2.volunteerPointRank - v1.volunteerPointRank)
 
   const volunteersToNotify = volunteersByPriority.slice(0, 5)
-  
+
   // notifications to record in the database
   const notifications = []
-  
+
   // notify the volunteers
   for (const volunteer of volunteersToNotify) {
     // record notification in database
@@ -207,34 +206,34 @@ const notifyRegular = async function (session) {
       type: 'REGULAR',
       method: 'SMS'
     })
-    
+
     const name = volunteer.firstname
-    
+
     const phoneNumber = volunteer.phone
-    
+
     const isTestUserRequest = session.student.isTestUser
-    
+
     // format message
     const sessionUrl = getSessionUrl(session._id)
     const messageText = `Hi ${name}, a student needs help in ${subtopic} on UPchieve! Click here to start helping them now: ${sessionUrl}`
-    
+
     const sendPromise = sendTextMessage(phoneNumber, messageText, isTestUserRequest)
-    
+
     try {
       notifications.push(await recordNotification(sendPromise, notification))
     } catch (err) {
       console.log(err)
     }
   }
-  
-  //save notifications to Session instance
+
+  // save notifications to Session instance
   await session.addNotifications(notifications)
   return notifications.length
 }
 
 const notifyFailsafe = async function (session, options) {
   const populatedSession = await Session.findById(session._id).populate('student notifications').exec()
-  
+
   var studentFirstname = populatedSession.student.firstname
 
   var studentLastname = populatedSession.student.lastname
@@ -256,29 +255,29 @@ const notifyFailsafe = async function (session, options) {
   const firstTimeNotice = isFirstTimeRequester ? 'for the first time ' : ''
 
   const volunteerIdsNotified = populatedSession.notifications.map((notification) => notification.volunteer)
-    
+
   const numOfRegularVolunteersNotified = await User.countDocuments({
     _id: { $in: volunteerIdsNotified },
     isFailsafeVolunteer: false
   })
-  .exec()
+    .exec()
 
   const numberOfVolunteersNotifiedMessage = `${numOfRegularVolunteersNotified} ` +
     `regular volunteer${numOfRegularVolunteersNotified === 1 ? ' has' : 's have'} been notified.`
 
   const sessionUrl = getSessionUrl(session._id)
-  
+
   // query the failsafe volunteers to notify
   const volunteersToNotify = await getFailsafeVolunteersFromDb().exec()
-  
+
   // notifications to record
   const notifications = []
-  
-  for (volunteer of volunteersToNotify) {
+
+  for (const volunteer of volunteersToNotify) {
     const name = volunteer.firstname
-    
+
     const phoneNumber = volunteer.phone
-    
+
     let messageText
     if (desperate) {
       messageText = `Hi ${name}, student ${studentFirstname} ${studentLastname} ` +
@@ -292,28 +291,28 @@ const notifyFailsafe = async function (session, options) {
         `on ${subtopic}. ${numberOfVolunteersNotifiedMessage} ` +
         `Please log in if you can to help them out.`
     }
-    
+
     if (!voice) {
       messageText = messageText + ` ${sessionUrl}`
     }
-    
-    const sendPromise = voice ? sendVoiceMessage(phoneNumber, messageText) 
-        : sendTextMessage(phoneNumber, messageText, isTestUserRequest)
-        
+
+    const sendPromise = voice ? sendVoiceMessage(phoneNumber, messageText)
+      : sendTextMessage(phoneNumber, messageText, isTestUserRequest)
+
     // record notification to database
     const notification = new Notification({
       volunteer: volunteer,
       type: 'FAILSAFE',
       method: voice ? 'VOICE' : 'SMS'
     })
-        
+
     try {
       notifications.push(await recordNotification(sendPromise, notification))
     } catch (err) {
       console.log(err)
     }
   }
-  
+
   // save notifications to session object
   await session.addNotifications(notifications)
 }
@@ -347,7 +346,7 @@ function recordNotification (sendPromise, notification) {
  * Helper function that gets the SessionTimeout object corresponding
  * to the given session
  */
-function getSessionTimeoutFor(session) {
+function getSessionTimeoutFor (session) {
   if (!(session._id in sessionTimeouts)) {
     sessionTimeouts[session._id] = new SessionTimeout(session._id, [], [])
   }
@@ -383,7 +382,7 @@ module.exports = {
   beginRegularNotifications: async function (session) {
     // initial wave
     await notifyRegular(session)
-    
+
     // set 3-minute notification interval
     const interval = setInterval(async (session) => {
       const volunteersNotified = await notifyRegular(session)
@@ -391,11 +390,11 @@ module.exports = {
         clearInterval(interval)
       }
     }, 180000, session)
-    
+
     // store interval in memory
     getSessionTimeoutFor(session).intervals.push(interval)
   },
-  
+
   // begin notifying failsafe volunteers for a session
   beginFailsafeNotifications: async function (session) {
     // initial notifications
@@ -410,7 +409,7 @@ module.exports = {
       voice: false
     })
     getSessionTimeoutFor(session).timeouts.push(desperateTimeout)
-    
+
     // timeout for desperate voice notification
     const desperateVoiceTimeout = setTimeout(notifyFailsafe, config.desperateVoiceTimeout, session, {
       desperate: true,
@@ -418,14 +417,14 @@ module.exports = {
     })
     getSessionTimeoutFor(session).timeouts.push(desperateVoiceTimeout)
   },
-  
+
   stopNotifications: function (session) {
     const sessionTimeout = getSessionTimeoutFor(session)
-    
+
     // clear all timeouts and intervals
     sessionTimeout.timeouts.forEach((timeout) => clearTimeout(timeout))
     sessionTimeout.intervals.forEach((interval) => clearInterval(interval))
-    
+
     // remove them from memory
     delete sessionTimeouts[session._id]
   }

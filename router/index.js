@@ -4,7 +4,7 @@ module.exports = function (app) {
   console.log('Initializing server routing')
 
   const sessionStore = require('./auth/session-store')(app)
-  
+
   require('./auth')(app)
   require('./api')(app, sessionStore)
   require('./edu')(app)

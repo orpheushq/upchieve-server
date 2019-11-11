@@ -44,7 +44,7 @@ module.exports = function (app) {
   console.log('Auth module')
 
   require('./passport')
-  
+
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(flash())
