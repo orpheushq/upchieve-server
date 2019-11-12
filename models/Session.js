@@ -154,7 +154,8 @@ sessionSchema.statics.findLatest = function (attrs, cb) {
     .sort({ createdAt: -1 })
     .limit(1)
     .findOne()
-    .populate('student volunteer')
+    .populate({ path: 'volunteer', select: 'firstname isVolunteer' })
+    .populate({ path: 'student', select: 'firstname isVolunteer' })
     .exec(cb)
 }
 
@@ -179,7 +180,7 @@ sessionSchema.statics.getUnfulfilledSessions = function (cb) {
   }
 
   return this.find(queryAttrs)
-    .populate('student')
+    .populate({ path: 'student', select: 'firstname isVolunteer' })
     .sort({ createdAt: -1 })
     .exec(cb)
 }
