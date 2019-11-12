@@ -70,8 +70,13 @@ module.exports = function (io) {
       userSockets[userId] = socket
 
       // get session data
+      const populateOptions = [
+        { path: 'student', select: 'firstname isVolunteer' },
+        { path: 'volunteer', select: 'firstname isVolunteer' }
+      ]
+      
       const session = await Session.findById(sessionId)
-        .populate('student volunteer')
+        .populate(populateOptions)
         .exec()
 
       socket.join(sessionId)
