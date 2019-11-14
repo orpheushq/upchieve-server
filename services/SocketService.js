@@ -104,7 +104,7 @@ module.exports = function (io) {
       io.to(sessionId).emit('messageSend', {
         contents: message.contents,
         name: message.user.firstname,
-        email: message.user.email,
+        userId: message.user._id,
         isVolunteer: message.user.isVolunteer,
         picture: message.user.picture,
         createdAt: message.createdAt
