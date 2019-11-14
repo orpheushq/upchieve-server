@@ -387,8 +387,8 @@ module.exports = {
 
     // set 3-minute notification interval
     const interval = setInterval(async (session) => {
-      const volunteersNotified = await notifyRegular(session)
-      if (volunteersNotified === 0) {
+      const numVolunteersNotified = await notifyRegular(session)
+      if (numVolunteersNotified === 0) {
         clearInterval(interval)
       }
     }, 180000, session)
