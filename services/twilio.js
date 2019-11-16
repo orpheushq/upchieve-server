@@ -4,6 +4,7 @@ var twilio = require('twilio')
 var moment = require('moment-timezone')
 const client = twilio(config.accountSid, config.authToken)
 const base64url = require('base64url')
+const _ = require('lodash')
 
 const Session = require('../models/Session')
 const Notification = require('../models/Notification')
@@ -214,8 +215,10 @@ const notifyRegular = async function (session) {
     const isTestUserRequest = session.student.isTestUser
 
     // format message
+    const callToActionWordings = ['Start', 'Click here to start', 'Click this link to start', 'Tap here to start', 'Follow this link to start']
+    const callToAction = _.sample(callToActionWordings)
     const sessionUrl = getSessionUrl(session._id)
-    const messageText = `Hi ${name}, a student needs help in ${subtopic} on UPchieve! Click here to start helping them now: ${sessionUrl}`
+    const messageText = `Hi ${name}, a student needs help in ${subtopic} on UPchieve! ${callToAction} helping them now: ${sessionUrl}`
 
     const sendPromise = sendTextMessage(phoneNumber, messageText, isTestUserRequest)
 
