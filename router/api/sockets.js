@@ -159,10 +159,14 @@ module.exports = function (io, sessionStore) {
     socket.on('dragEnd', async function (data) {
       if (!data || !data.sessionId) return
 
-      await sessionCtrl.verifySessionParticipantBySessionId(
-        data.sessionId,
+      const session = await Session.findById(data.sessionId)
+
+      await sessionCtrl.verifySessionParticipant(
+        session,
         socket.request.user,
         whiteboardAccessError)
+
+      session.saveWhiteboardUrl(data.whiteboardUrl)
 
       socket.broadcast.to(data.sessionId).emit('dend', {
         x: data.x,
