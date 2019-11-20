@@ -34,9 +34,13 @@ module.exports = {
     },
     foobar: {
       name: 'Foo Bar & Co',
-      requiredEmailDomains: ['example.org', 'example.net']
+      requiredEmailDomains: ['example.org', 'example.net'],
+      mathCoachingOnly: true
     }
   },
+
+  // Sentry Data Source Name
+  sentryDsn: '',
 
   // Twilio Credentials
   accountSid: '',
