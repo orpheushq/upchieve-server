@@ -16,7 +16,10 @@ module.exports = function (router) {
     }
 
     // Return volunteer user
-    req.user.populateForVolunteerStats().execPopulate().then(populatedUser => {
+    const userPromise = req.query.withStats
+      ? req.user.populateForVolunteerStats().execPopulate()
+      : Promise.resolve(req.user)
+    return userPromise.then(populatedUser => {
       return res.json({
         user: populatedUser.parseProfile()
       })
