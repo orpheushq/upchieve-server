@@ -4,7 +4,7 @@ module.exports = function (router) {
   router.post('/feedback', function (req, res) {
     var body = req.body
     var feedback = new Feedback({
-      sessionId: body['sessionId'],
+      session: body['sessionId'],
       type: body['topic'],
       subTopic: body['subTopic'],
       responseData: body['responseData'],
