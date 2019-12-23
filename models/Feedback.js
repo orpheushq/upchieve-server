@@ -1,9 +1,9 @@
 var mongoose = require('mongoose')
 
 var feedbackSchema = new mongoose.Schema({
-  sessionId: {
-    type: String,
-    default: ''
+  session: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Session'
   },
 
   type: {
