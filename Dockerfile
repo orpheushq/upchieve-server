@@ -41,7 +41,6 @@ RUN node -v
 RUN npm -v
 RUN mkdir /data && mkdir /data/db
 EXPOSE 3000
-EXPOSE 3001
 
 ARG FOO
 COPY . .
