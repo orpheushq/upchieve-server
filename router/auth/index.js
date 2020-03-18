@@ -483,7 +483,7 @@ module.exports = function(app) {
     if (!token.match(/^[a-f0-9]{32}$/)) {
       return res.status(422).json({
         err:
-          'Please verify that this url matches the link that was sent to your inbox.'
+          'Please verify that this URL matches the link that was sent to your inbox.'
       })
     }
 
@@ -493,7 +493,7 @@ module.exports = function(app) {
       if (!user) {
         res.status(404).json({
           err:
-            'This url is no longer valid. Please check your inbox for the most recent password reset request email.'
+            'This URL is no longer valid. Please check your inbox for the most recent password reset request email.'
         })
       } else {
         res.sendStatus(204)
