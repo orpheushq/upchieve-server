@@ -193,32 +193,31 @@ module.exports = function(app) {
     const highschoolLookupPromise = new Promise((resolve, reject) => {
       if (isVolunteer) {
         // don't look up high schools for volunteers
-        resolve({
+        return resolve({
           isVolunteer: true
         })
-
-        // early exit
-        return
       } else if (!highSchoolProvided) {
         // Don't look up high school for students who didn't provide one (it's not required for certain partner orgs)
-        resolve({
+        return resolve({
           isVolunteer: false
         })
       }
 
       School.findByUpchieveId(highSchoolUpchieveId, (err, school) => {
         if (err) {
-          reject(err)
+          return reject(err)
         } else if (!highSchoolApprovalRequired) {
           // Don't require valid high school for students referred from partner or with eligible zip code
-          resolve({
+          return resolve({
             isVolunteer: false,
             school
           })
         } else if (highSchoolApprovalRequired && !school.isApproved) {
-          reject(new Error(`School ${highSchoolUpchieveId} is not approved`))
+          return reject(
+            new Error(`School ${highSchoolUpchieveId} is not approved`)
+          )
         } else {
-          resolve({
+          return resolve({
             isVolunteer: false,
             school
           })
