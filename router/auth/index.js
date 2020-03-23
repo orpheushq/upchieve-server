@@ -198,19 +198,17 @@ module.exports = function(app) {
 
         // early exit
         return
-      } else if (highSchoolApprovalNotRequired) {
-        // Don't require valid high school for students referred from partner or with eligible zip code
-        resolve({
-          isVolunteer: false
-        })
-
-        // early exit
-        return
       }
 
       School.findByUpchieveId(highSchoolUpchieveId, (err, school) => {
         if (err) {
           reject(err)
+        } else if (highSchoolApprovalNotRequired) {
+          // Don't require valid high school for students referred from partner or with eligible zip code
+          resolve({
+            isVolunteer: false,
+            school
+          })
         } else if (!studentPartnerOrg && !school.isApproved) {
           reject(new Error(`School ${highSchoolUpchieveId} is not approved`))
         } else {
