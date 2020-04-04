@@ -35,7 +35,7 @@ db.once('open', function() {
 startCronJobs()
 
 const app = express()
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 443)
 
 /**
  * Account for nginx proxy when getting client's IP address

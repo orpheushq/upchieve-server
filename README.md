@@ -96,6 +96,13 @@ asdf install mongodb [VERSION]
 
 [bcrypt]: https://www.npmjs.com/package/bcrypt
 
+## Stop Server
+The server seems to keep running in the background, blocking port 3000. To end the service,
+``` bash
+lsof -i 3000
+kill -9 <PID> #where <PID> is the process ID from the command above
+```
+
 ### Test Users
 
 The database is populated with the following users for local development:
