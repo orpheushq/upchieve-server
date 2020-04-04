@@ -11,6 +11,11 @@ const mongoose = require('mongoose')
 const Sentry = require('@sentry/node')
 const expressWs = require('@small-tech/express-ws')
 
+
+const https = require('https');
+const fs = require('fs');
+
+
 // Cron jobs
 const startCronJobs = require('./cron-jobs')
 
@@ -64,7 +69,15 @@ app.use(function(req, res, next) {
   next()
 })
 
-const server = http.createServer(app)
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/server2.help.lk/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/server2.help.lk/fullchain.pem')
+}
+const server = https.createServer(options, app)
+/*const server = https.createServer(options, (req, res) => {
+  res.writeHead(200);
+  res.end('hello world\n');
+}).listen(8000);*/
 
 const port = app.get('port')
 server.listen(port)

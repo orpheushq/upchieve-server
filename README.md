@@ -103,6 +103,12 @@ lsof -i 3000
 kill -9 <PID> #where <PID> is the process ID from the command above
 ```
 
+## Run SSL Server
+Edit main.js and set and change the line (3000 to 443)
+``` js
+app.set('port', process.env.PORT || 3000);
+```
+
 ### Test Users
 
 The database is populated with the following users for local development:
