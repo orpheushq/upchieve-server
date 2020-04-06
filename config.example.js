@@ -5,7 +5,7 @@ module.exports = {
   SSL_CERT_PATH: '/etc/letsencrypt/live/server2.help.lk/fullchain.pem',
   // set host to your public IP address to test Twilio voice calling
   host: process.env.SERVER_HOST || 'localhost:3000',
-  database: 'mongodb://localhost:27017/upchieve',
+  database: 'mongodb://rootadmin02:Increase@localhost:27017/upchieve',
   sessionSecret: process.env.SESSION_SECRET || 'secret',
   sessionCookieMaxAge: process.env.SESSION_COOKIE_MAX_AGE || 5184000000,
   saltRounds: 10,
